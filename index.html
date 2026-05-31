@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hockey Wedstrijdschema & Taken</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <header class="mb-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-emerald-700 tracking-tight">🏑 Hockey Taken Planner</h1>
+                <p id="appSubtitle" class="text-slate-500 mt-1">Laden...</p>
+            </div>
+            <div id="modeBadge" class="text-xs font-bold px-3 py-1 rounded-full shadow-xs"></div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <div id="adminPanel" class="space-y-6 hidden">
+                
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <h2 class="text-lg font-bold mb-1 text-slate-700 flex items-center gap-2">🏃‍♂️ Team & Statistieken</h2>
+                    <p class="text-xs text-slate-400 mb-3">Groen = Uitgevoerde taken | Rood = Aantal keer afgemeld.</p>
+                    <form id="rosterForm" class="flex gap-2 mb-4">
+                        <input type="text" id="playerName" placeholder="Naam speler..." required class="flex-1 px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium px-3 py-1.5 rounded-lg transition">Toevoegen</button>
+                    </form>
+                    <div id="rosterList" class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                        </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h2 id="formTitle" class="text-xl font-bold mb-4 text-slate-700">Nieuwe Wedstrijd</h2>
+                    <form id="matchForm" class="space-y-4">
+                        
+                        <div>
+                            <label class="block text-sm font-semibold mb-1.5">Locatie</label>
+                            <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
+                                <label class="cursor-pointer text-center py-1.5 text-sm font-medium rounded-lg block has-[:checked]:bg-white has-[:checked]:text-emerald-700 has-[:checked]:shadow-xs text-slate-600">
+                                    <input type="radio" name="venue" value="Thuis" checked onchange="toggleAddressField()" class="sr-only"> 🏡 Thuis
+                                </label>
+                                <label class="cursor-pointer text-center py-1.5 text-sm font-medium rounded-lg block has-[:checked]:bg-white has-[:checked]:text-amber-700 has-[:checked]:shadow-xs text-slate-600">
+                                    <input type="radio" name="venue" value="Uit" onchange="toggleAddressField()" class="sr-only"> 🚌 Uit
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-3">
+                            <div class="col-span-2">
+                                <label class="block text-sm font-semibold mb-1">Tegenstander</label>
+                                <input type="text" id="opponent" required placeholder="Kampong HC" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold mb-1">Veld nr.</label>
+                                <input type="text" id="fieldNumber" placeholder="Veld 2" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                        </div>
+
+                        <div id="addressFieldContainer" class="hidden">
+                            <label class="block text-sm font-semibold mb-1">Adres tegenstander</label>
+                            <input type="text" id="matchAddress" placeholder="Laan van Maarschalkerweerd 14, Utrecht" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">Datum</label>
+                            <input type="date" id="matchDate" required class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-semibold mb-1">Verzameltijd ⏱️</label>
+                                <input type="time" id="meetTime" required class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold mb-1">Aanvang wedstrijd 🏑</label>
+                                <input type="time" id="startTime" required class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                        </div>
+
+                        <div class="border-t border-slate-100 pt-3">
+                            <label class="block text-sm font-bold text-slate-600 mb-1.5">Afmeldingen voor deze pot 🚫</label>
+                            <div id="formAbsencesList" class="flex flex-wrap gap-2 max-h-24 overflow-y-auto p-1 bg-slate-50 rounded-xl border border-slate-100">
+                                </div>
+                        </div>
+
+                        <div class="border-t border-slate-100 pt-3">
+                            <label class="block text-sm font-bold text-slate-600 mb-2">Taakverdeling</label>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-500">Keeper (en neemt tas mee) 🛡️</label>
+                                    <select id="dutyKeeper" class="duty-select w-full px-3 py-1.5 text-sm border border-slate-200 rounded-md bg-white"></select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-500">Keeper Coach 🧑‍🏫</label>
+                                    <select id="dutyKeeperCoach" class="duty-select w-full px-3 py-1.5 text-sm border border-slate-200 rounded-md bg-white"></select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-500">Fruit / Snacks 🍊</label>
+                                    <select id="dutySnack" class="duty-select w-full px-3 py-1.5 text-sm border border-slate-200 rounded-md bg-white"></select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-500">Scheidsrechter 🏁</label>
+                                    <select id="dutyReferee" class="duty-select w-full px-3 py-1.5 text-sm border border-slate-200 rounded-md bg-white"></select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-500">Veldcoach 🚐</label>
+                                    <select id="dutyCoach" class="duty-select w-full px-3 py-1.5 text-sm border border-slate-200 rounded-md bg-white"></select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 pt-2">
+                            <button type="submit" id="submitBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg transition duration-200 shadow-sm">
+                                Toevoegen aan Schema
+                            </button>
+                            <button type="button" id="cancelEditBtn" onclick="resetFormState()" class="w-full hidden bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium py-2 rounded-lg transition duration-200">
+                                Annuleren
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="scheduleContainer" class="lg:col-span-3 space-y-8">
+                
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-slate-700">Aankomende Wedstrijden & Taken</h2>
+                        <span id="matchCount" class="bg-emerald-100 text-emerald-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">0 Wedstrijden</span>
+                    </div>
+                    
+                    <div id="scheduleList" class="space-y-4">
+                        <div id="emptyState" class="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200 text-slate-400">
+                            <span class="text-4xl">📅</span>
+                            <p class="mt-2 text-sm">Er zijn momenteel geen aankomende wedstrijden ingepland.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-200 pt-6">
+                    <details class="group bg-slate-100/60 rounded-2xl p-4 border border-slate-200/60" open>
+                        <summary class="flex justify-between items-center font-bold text-slate-600 cursor-pointer select-none list-none">
+                            <span class="flex items-center gap-2">📜 Gespeelde Wedstrijden (Archief & Uitslagen) <span id="archiveCount" class="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-semibold">0</span></span>
+                            <span class="transition group-open:rotate-180 text-sm">👇</span>
+                        </summary>
+                        <div id="archiveList" class="space-y-4 mt-4">
+                            </div>
+                    </details>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const isAdmin = urlParams.get('admin') === 'ja';
+
+        // App Status
+        let matches = JSON.parse(localStorage.getItem('hockeySchedule')) || [];
+        let roster = JSON.parse(localStorage.getItem('hockeyRoster')) || ['Nog niet toegewezen'];
+        let editIndex = null; 
+
+        // DOM Elementen
+        const adminPanel = document.getElementById('adminPanel');
+        const scheduleContainer = document.getElementById('scheduleContainer');
+        const appSubtitle = document.getElementById('appSubtitle');
+        const modeBadge = document.getElementById('modeBadge');
+        
+        const matchForm = document.getElementById('matchForm');
+        const formTitle = document.getElementById('formTitle');
+        const submitBtn = document.getElementById('submitBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const addressFieldContainer = document.getElementById('addressFieldContainer');
+        const formAbsencesList = document.getElementById('formAbsencesList');
+        
+        const rosterForm = document.getElementById('rosterForm');
+        const rosterList = document.getElementById('rosterList');
+        const scheduleList = document.getElementById('scheduleList');
+        const archiveList = document.getElementById('archiveList');
+        const emptyState = document.getElementById('emptyState');
+        const matchCount = document.getElementById('matchCount');
+        const archiveCount = document.getElementById('archiveCount');
+        const dutySelects = document.querySelectorAll('.duty-select');
+
+        // --- MODUS CONFIGURATIE ---
+        if (isAdmin) {
+            adminPanel.classList.remove('hidden');
+            scheduleContainer.classList.replace('lg:col-span-3', 'lg:col-span-2');
+            appSubtitle.textContent = "Beheer de spelerslijst, uitslagen, afmeldingen en teamtaken.";
+            modeBadge.textContent = "🛠️ MANAGER MODUS";
+            modeBadge.className = "text-xs font-bold px-3 py-1 rounded-full shadow-xs bg-purple-100 text-purple-800";
+        } else {
+            appSubtitle.textContent = "Actueel overzicht van alle aankomende wedstrijden, uitslagen en teamtaken.";
+            modeBadge.textContent = "👀 OUDER OVERZICHT";
+            modeBadge.className = "text-xs font-bold px-3 py-1 rounded-full shadow-xs bg-slate-100 text-slate-600";
+        }
+
+        window.toggleAddressField = function() {
+            const venue = document.querySelector('input[name="venue"]:checked').value;
+            if (venue === 'Uit') {
+                addressFieldContainer.classList.remove('hidden');
+            } else {
+                addressFieldContainer.classList.add('hidden');
+                document.getElementById('matchAddress').value = '';
+            }
+        };
+
+        // --- STATISTIEKEN & TEAM BEHEER ---
+        function calculateStats() {
+            const stats = {};
+            roster.forEach(player => { 
+                if(player !== 'Nog niet toegewezen') stats[player] = { duties: 0, absences: 0 }; 
+            });
+
+            matches.forEach(match => {
+                // Tel taken
+                Object.values(match.duties).forEach(player => {
+                    if (player && stats[player] !== undefined) stats[player].duties++;
+                });
+                // Tel afmeldingen
+                if (match.absences && Array.isArray(match.absences)) {
+                    match.absences.forEach(player => {
+                        if (stats[player] !== undefined) stats[player].absences++;
+                    });
+                }
+            });
+            return stats;
+        }
+
+        function renderRoster() {
+            const stats = calculateStats();
+            
+            // Render select dropdowns voor taken
+            dutySelects.forEach(select => {
+                const currentVal = select.value;
+                select.innerHTML = '';
+                roster.forEach(player => {
+                    const opt = document.createElement('option');
+                    opt.value = player === 'Nog niet toegewezen' ? '' : player;
+                    opt.textContent = player;
+                    select.appendChild(opt);
+                });
+                select.value = currentVal;
+            });
+
+            // Render de Afmeld-checkboxes in het formulier
+            formAbsencesList.innerHTML = '';
+            let validPlayersCount = 0;
+            roster.forEach((player) => {
+                if (player === 'Nog niet toegewezen') return;
+                validPlayersCount++;
+                const label = document.createElement('label');
+                label.className = "inline-flex items-center gap-1 bg-white border border-slate-200 px-2 py-1 rounded-lg text-xs font-medium cursor-pointer text-slate-600 hover:bg-slate-100 select-none";
+                label.innerHTML = `<input type="checkbox" name="absentPlayers" value="${player}" class="rounded border-slate-300 text-rose-600 focus:ring-rose-500"> ${player}`;
+                formAbsencesList.appendChild(label);
+            });
+            if(validPlayersCount === 0) formAbsencesList.innerHTML = '<span class="text-xs text-slate-400 p-1">Voeg eerst spelers toe...</span>';
+
+            if (!isAdmin) return; 
+
+            // Render spelerslijst in beheerpaneel met beide tellers
+            rosterList.innerHTML = '';
+            roster.forEach((player, index) => {
+                if (index === 0) return; 
+                const playerStat = stats[player] || { duties: 0, absences: 0 };
+                
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between bg-slate-50 border border-slate-100 p-2 rounded-xl text-sm font-medium';
+                item.innerHTML = `
+                    <span class="text-slate-700">${player}</span>
+                    <div class="flex items-center gap-1.5">
+                        <span class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2 py-0.5 rounded-full" title="Uitgevoerde taken">📊 ${playerStat.duties}</span>
+                        <span class="bg-rose-100 text-rose-800 text-[11px] font-bold px-2 py-0.5 rounded-full" title="Afmeldingen">🚫 ${playerStat.absences}x</span>
+                        <button type="button" onclick="deletePlayer(${index})" class="text-slate-300 hover:text-rose-500 font-bold text-base transition ml-1">×</button>
+                    </div>
+                `;
+                rosterList.appendChild(item);
+            });
+        }
+
+        if (isAdmin) {
+            rosterForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const nameInput = document.getElementById('playerName');
+                const name = nameInput.value.trim();
+                
+                if (name && !roster.includes(name)) {
+                    roster.push(name);
+                    localStorage.setItem('hockeyRoster', JSON.stringify(roster));
+                    renderRoster();
+                    nameInput.value = '';
+                }
+            });
+
+            window.deletePlayer = function(index) {
+                if(confirm(`Weet je zeker dat je ${roster[index]} wilt verwijderen?`)) {
+                    roster.splice(index, 1);
+                    localStorage.setItem('hockeyRoster', JSON.stringify(roster));
+                    renderRoster();
+                }
+            };
+        }
+
+        // --- WEDSTRIJD & ARCHIEF BEHEER ---
+        window.saveResult = function(index, scoreValue) {
+            matches[index].result = scoreValue.trim();
+            localStorage.setItem('hockeySchedule', JSON.stringify(matches));
+        };
+
+        function renderSchedule() {
+            scheduleList.querySelectorAll('.match-card').forEach(c => c.remove());
+            archiveList.querySelectorAll('.match-card').forEach(c => c.remove());
+
+            const today = new Date();
+            today.setHours(0,0,0,0);
+
+            matches.sort((a, b) => new Date(`${a.date}T${a.startTime}`) - new Date(`${b.date}T${b.startTime}`));
+
+            let activeCount = 0;
+            let archivedCount = 0;
+
+            matches.forEach((match, originalIndex) => {
+                const matchDateObj = new Date(match.date);
+                matchDateObj.setHours(0,0,0,0);
+                
+                const isPast = matchDateObj < today;
+
+                const card = document.createElement('div');
+                card.className = `match-card p-5 rounded-2xl shadow-sm border transition hover:shadow-md ${isPast ? 'bg-slate-50 border-slate-200/70' : 'bg-white border-slate-100'}`;
+                
+                const formattedDate = new Date(match.date).toLocaleDateString('nl-NL', { 
+                    weekday: 'short', month: 'short', day: 'numeric' 
+                });
+
+                const venueBadge = match.venue === 'Thuis' 
+                    ? `<span class="bg-emerald-50 text-emerald-700 border border-emerald-200/60 text-[11px] font-bold px-2 py-0.5 rounded-md">🏡 THUIS</span>`
+                    : `<span class="bg-amber-50 text-amber-700 border border-amber-200/60 text-[11px] font-bold px-2 py-0.5 rounded-md">🚌 UIT</span>`;
+
+                const fieldBadge = match.fieldNumber ? `<span class="bg-slate-100 text-slate-600 text-[11px] font-bold px-2 py-0.5 rounded-md">📍 Veld ${match.fieldNumber}</span>` : '';
+                
+                let mapsBadge = '';
+                if (match.venue === 'Uit' && match.address) {
+                    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(match.address)}`;
+                    mapsBadge = `<a href="${mapsUrl}" target="_blank" class="bg-blue-50 text-blue-600 hover:underline border border-blue-200/60 text-[11px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1">🗺️ Route</a>`;
+                }
+
+                // Render afmeld-badge in overzicht
+                let absenceBadge = '';
+                if (match.absences && match.absences.length > 0) {
+                    absenceBadge = `<div class="mt-2 text-xs bg-rose-50 text-rose-700 border border-rose-100/80 px-2.5 py-1 rounded-xl flex flex-wrap items-center gap-1.5">
+                        <span class="font-bold">🚫 Afgemeld:</span> ${match.absences.join(', ')}
+                    </div>`;
+                }
+
+                // Render uitslag blok (HTML verschilt voor admin en ouders in het archief)
+                let resultBlock = '';
+                if (isPast) {
+                    const currentResult = match.result || '';
+                    if (isAdmin) {
+                        resultBlock = `
+                            <div class="mt-3 pt-2 border-t border-dashed border-slate-200 flex items-center gap-2">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">🏆 Uitslag invoeren:</label>
+                                <input type="text" value="${currentResult}" placeholder="bijv. 3 - 1" onchange="saveResult(${originalIndex}, this.value)" class="w-24 px-2 py-1 text-xs border border-slate-300 rounded-md bg-white text-center font-bold text-emerald-700 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                            </div>`;
+                    } else if (currentResult) {
+                        resultBlock = `
+                            <div class="mt-3 pt-2 border-t border-dashed border-slate-200">
+                                <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-lg border border-emerald-100">🏆 Uitslag: ${currentResult}</span>
+                            </div>`;
+                    }
+                }
+
+                // Acties configureren
+                let actieKnoppen = '';
+                if (isAdmin) {
+                    actieKnoppen = `
+                        <button onclick="shareMatch(${originalIndex}, true)" class="w-full md:w-auto text-xs bg-slate-800 hover:bg-slate-900 text-white font-medium px-3 py-1.5 rounded-lg transition flex items-center justify-center gap-1">📲 WhatsApp</button>
+                        <button onclick="shareMatch(${originalIndex}, false)" class="w-full md:w-auto text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-3 py-1.5 rounded-lg transition flex items-center justify-center gap-1">📋 Kopieer</button>
+                        <button onclick="startEditMatch(${originalIndex})" class="w-full md:w-auto text-xs bg-amber-50 hover:bg-amber-100 text-amber-700 font-medium px-3 py-1.5 rounded-lg transition flex items-center justify-center gap-1">✏️ Wijzig</button>
+                        <button onclick="deleteMatch(${originalIndex})" class="w-full md:w-auto text-xs text-rose-500 hover:bg-rose-50 font-medium px-3 py-1.5 rounded-lg transition flex items-center justify-center gap-1">🗑️ Wis</button>
+                    `;
+                } else {
+                    actieKnoppen = `
+                        <button onclick="shareMatch(${originalIndex}, true)" class="w-full md:w-auto text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2 rounded-lg transition flex items-center justify-center gap-1">📲 WhatsApp</button>
+                        <button onclick="shareMatch(${originalIndex}, false)" class="w-full md:w-auto text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-4 py-2 rounded-lg transition flex items-center justify-center gap-1">📋 Kopieer Info</button>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="flex-1">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="bg-slate-800 text-white font-bold text-xs px-2 py-0.5 rounded-md">⏱️ Verz: ${match.meetTime} u</span>
+                            <span class="bg-emerald-700 text-white font-bold text-xs px-2 py-0.5 rounded-md">🏑 Start: ${match.startTime} u</span>
+                            <span class="text-slate-500 text-sm font-medium capitalize">${formattedDate}</span>
+                            ${venueBadge}
+                            ${fieldBadge}
+                            ${mapsBadge}
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800 mt-1.5">vs ${match.opponent}</h3>
+                        ${match.address ? `<p class="text-xs text-slate-400 mt-0.5">🏠 Adres: ${match.address}</p>` : ''}
+                        
+                        ${absenceBadge}
+                        ${resultBlock}
+
+                        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-3 pt-3 border-t border-slate-100">
+                            <div class="bg-blue-50/40 p-2 rounded-xl border border-blue-100/30">
+                                <span class="block text-[10px] uppercase font-bold tracking-wider text-blue-500">Keeper 🛡️</span>
+                                <span class="text-xs font-semibold text-slate-700">${match.duties.keeper || '—'}</span>
+                            </div>
+                            <div class="bg-cyan-50/40 p-2 rounded-xl border border-cyan-100/30">
+                                <span class="block text-[10px] uppercase font-bold tracking-wider text-cyan-600">Keeper Coach 🧑‍🏫</span>
+                                <span class="text-xs font-semibold text-slate-700">${match.duties.keeperCoach || '—'}</span>
+                            </div>
+                            <div class="bg-amber-50/40 p-2 rounded-xl border border-amber-100/30">
+                                <span class="block text-[10px] uppercase font-bold tracking-wider text-amber-600">Fruit 🍊</span>
+                                <span class="text-xs font-semibold text-slate-700">${match.duties.snack || '—'}</span>
+                            </div>
+                            <div class="bg-purple-50/40 p-2 rounded-xl border border-purple-100/30">
+                                <span class="block text-[10px] uppercase font-bold tracking-wider text-purple-500">Scheids 🏁</span>
+                                <span class="text-xs font-semibold text-slate-700">${match.duties.referee || '—'}</span>
+                            </div>
+                            <div class="bg-rose-50/40 p-2 rounded-xl border border-rose-100/30">
+                                <span class="block text-[10px] uppercase font-bold tracking-wider text-rose-500">Veldcoach 🚐</span>
+                                <span class="text-xs font-semibold text-slate-700">${match.duties.coach || '—'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap md:flex-col items-center justify-end gap-2 border-t md:border-t-0 pt-3 md:pt-0 border-slate-100">
+                        ${actieKnoppen}
+                    </div>
+                `;
+
+                if (isPast) {
+                    archiveList.appendChild(card);
+                    archivedCount++;
+                } else {
+                    scheduleList.appendChild(card);
+                    activeCount++;
+                }
+            });
+
+            emptyState.style.display = activeCount === 0 ? 'block' : 'none';
+            matchCount.textContent = `${activeCount} Wedstrijd${activeCount !== 1 ? 'en' : ''}`;
+            archiveCount.textContent = archivedCount;
+        }
+
+        // --- WIJZIG LOGICA (ALLEEN ADMIN) ---
+        window.startEditMatch = function(index) {
+            editIndex = index;
+            const match = matches[index];
+
+            document.getElementById('opponent').value = match.opponent;
+            document.getElementById('fieldNumber').value = match.fieldNumber || '';
+            document.getElementById('matchDate').value = match.date;
+            document.getElementById('meetTime').value = match.meetTime;
+            document.getElementById('startTime').value = match.startTime;
+            document.querySelector(`input[name="venue"][value="${match.venue}"]`).checked = true;
+            
+            toggleAddressField();
+            if (match.venue === 'Uit') {
+                document.getElementById('matchAddress').value = match.address || '';
+            }
+            
+            // Vink de juiste afgemelde spelers aan
+            const checkBoxes = document.querySelectorAll('input[name="absentPlayers"]');
+            checkBoxes.forEach(cb => {
+                cb.checked = match.absences && match.absences.includes(cb.value);
+            });
+
+            document.getElementById('dutyKeeper').value = match.duties.keeper || '';
+            document.getElementById('dutyKeeperCoach').value = match.duties.keeperCoach || '';
+            document.getElementById('dutySnack').value = match.duties.snack || '';
+            document.getElementById('dutyReferee').value = match.duties.referee || '';
+            document.getElementById('dutyCoach').value = match.duties.coach || '';
+
+            formTitle.textContent = "Wedstrijd Wijzigen";
+            submitBtn.textContent = "Wijziging Opslaan";
+            submitBtn.className = "w-full bg-amber-600 hover:bg-amber-700 text-white font-medium py-2.5 rounded-lg transition duration-200 shadow-sm";
+            cancelEditBtn.classList.remove('hidden');
+
+            adminPanel.scrollIntoView({ behavior: 'smooth' });
+        };
+
+        window.resetFormState = function() {
+            editIndex = null;
+            matchForm.reset();
+            formTitle.textContent = "Nieuwe Wedstrijd";
+            submitBtn.textContent = "Toevoegen aan Schema";
+            submitBtn.className = "w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg transition duration-200 shadow-sm";
+            cancelEditBtn.classList.add('hidden');
+            document.querySelector('input[name="venue"][value="Thuis"]').checked = true;
+            toggleAddressField();
+            
+            // Ontvink alle checkboxes
+            document.querySelectorAll('input[name="absentPlayers"]').forEach(cb => cb.checked = false);
+        };
+
+        if (isAdmin) {
+            matchForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const venueValue = document.querySelector('input[name="venue"]:checked').value;
+
+                // Haal geselecteerde afmeldingen op
+                const absentPlayers = [];
+                document.querySelectorAll('input[name="absentPlayers"]:checked').forEach(cb => {
+                    absentPlayers.push(cb.value);
+                });
+
+                const matchData = {
+                    opponent: document.getElementById('opponent').value,
+                    fieldNumber: document.getElementById('fieldNumber').value.trim(),
+                    address: venueValue === 'Uit' ? document.getElementById('matchAddress').value.trim() : '',
+                    date: document.getElementById('matchDate').value,
+                    meetTime: document.getElementById('meetTime').value,
+                    startTime: document.getElementById('startTime').value,
+                    venue: venueValue,
+                    absences: absentPlayers,
+                    result: editIndex !== null ? (matches[editIndex].result || '') : '', // Behoud uitslag bij bewerken
+                    duties: {
+                        keeper: document.getElementById('dutyKeeper').value,
+                        keeperCoach: document.getElementById('dutyKeeperCoach').value,
+                        snack: document.getElementById('dutySnack').value,
+                        referee: document.getElementById('dutyReferee').value,
+                        coach: document.getElementById('dutyCoach').value,
+                    }
+                };
+
+                if (editIndex !== null) {
+                    matches[editIndex] = matchData;
+                    editIndex = null;
+                } else {
+                    matches.push(matchData);
+                }
+
+                localStorage.setItem('hockeySchedule', JSON.stringify(matches));
+                renderSchedule();
+                renderRoster(); 
+                resetFormState();
+            });
+
+            window.deleteMatch = function(index) {
+                if(confirm("Weet je zeker dat je deze wedstrijd wilt verwijderen?")) {
+                    if (editIndex === index) resetFormState();
+                    matches.splice(index, 1);
+                    localStorage.setItem('hockeySchedule', JSON.stringify(matches));
+                    renderSchedule();
+                    renderRoster(); 
+                }
+            };
+        }
+
+        // --- WHATSAPP / DEEL FUNCTIE ---
+        window.shareMatch = function(index, launchWhatsApp = false) {
+            const match = matches[index];
+            const formattedDate = new Date(match.date).toLocaleDateString('nl-NL', { 
+                weekday: 'long', month: 'long', day: 'numeric' 
+            });
+
+            const veldRegel = match.fieldNumber ? `📍 *Veld:* Veld ${match.fieldNumber}\n` : '';
+            const uitslagRegel = match.result ? `🏆 *Uitslag:* ${match.result}\n` : '';
+            const afmeldRegel = (match.absences && match.absences.length > 0) ? `🚫 *Afgemeld:* ${match.absences.join(', ')}\n` : '';
+            
+            let adresRegel = '';
+            if (match.venue === 'Uit' && match.address) {
+                const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(match.address)}`;
+                adresRegel = `🏠 *Adres:* ${match.address}\n🗺️ *Google Maps:* ${mapsUrl}\n`;
+            }
+
+            const textTemplate = `🏑 *WEDSTRIJD INFORMATIE* 🏑\n` +
+                `---------------------------\n` +
+                `🆚 *Tegenstander:* vs ${match.opponent} (${match.venue})\n` +
+                `📅 *Datum:* ${formattedDate}\n` +
+                `⏱️ *Verzamelen:* ${match.meetTime} uur\n` +
+                `🏑 *Aanvang:* ${match.startTime} uur\n` +
+                veldRegel + adresRegel + uitslagRegel + afmeldRegel +
+                `\n📋 *TAAKVERDELING:*\n` +
+                `🛡️ *Keeper:* ${match.duties.keeper || 'Nog invullen'}\n` +
+                `🧑‍🏫 *Keeper Coach:* ${match.duties.keeperCoach || 'Nog invullen'}\n` +
+                `🍊 *Fruit/Snacks:* ${match.duties.snack || 'Nog invullen'}\n` +
+                `🏁 *Scheidsrechter:* ${match.duties.referee || 'Nog invullen'}\n` +
+                `🚐 *Veldcoach:* ${match.duties.coach || 'Nog invullen'}\n` +
+                `---------------------------`;
+
+            if (launchWhatsApp) {
+                const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(textTemplate)}`;
+                window.open(whatsappUrl, '_blank');
+            } else {
+                navigator.clipboard.writeText(textTemplate).then(() => {
+                    alert(`✨ Wedstrijdgegevens gekopieerd naar klembord!`);
+                }).catch(err => console.error('Kopiëren mislukt: ', err));
+            }
+        };
+
+        // Eerste Start
+        renderRoster();
+        renderSchedule();
+    </script>
+</body>
+</html>
