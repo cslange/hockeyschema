@@ -60,8 +60,8 @@
                         </div>
 
                         <div id="addressFieldContainer" class="hidden">
-                            <label class="block text-sm font-semibold mb-1">Adres tegenstander</label>
-                            <input type="text" id="matchAddress" placeholder="Laan van Maarschalkerweerd 14, Utrecht" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <label class="block text-sm font-semibold mb-1 text-amber-800">🏠 Adres tegenstander (voor Google Maps)</label>
+                            <input type="text" id="matchAddress" placeholder="Laan van Maarschalkerweerd 14, Utrecht" class="w-full px-3 py-2 border border-amber-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-amber-50/30">
                         </div>
                         
                         <div>
@@ -331,7 +331,7 @@
                 const isPast = matchDateObj < today;
 
                 const card = document.createElement('div');
-                card.className = `match-card p-5 rounded-2xl shadow-sm border transition hover:shadow-md ${isPast ? 'bg-slate-50 border-slate-200/70' : 'bg-white border-slate-100'}`;
+                card.className = `match-card p-5 rounded-2xl shadow-sm border transition hover:shadow-md flex flex-col md:flex-row gap-4 justify-between ${isPast ? 'bg-slate-50 border-slate-200/70' : 'bg-white border-slate-100'}`;
                 
                 const formattedDate = new Date(match.date).toLocaleDateString('nl-NL', { 
                     weekday: 'short', month: 'short', day: 'numeric' 
@@ -346,7 +346,7 @@
                 let mapsBadge = '';
                 if (match.venue === 'Uit' && match.address) {
                     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(match.address)}`;
-                    mapsBadge = `<a href="${mapsUrl}" target="_blank" class="bg-blue-50 text-blue-600 hover:underline border border-blue-200/60 text-[11px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1">🗺️ Route</a>`;
+                    mapsBadge = `<a href="${mapsUrl}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white border border-blue-700 text-[11px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-xs transition">🗺️ Route</a>`;
                 }
 
                 // Render afmeld-badge in overzicht
@@ -357,7 +357,7 @@
                     </div>`;
                 }
 
-                // Render uitslag blok (HTML verschilt voor admin en ouders in het archief)
+                // Render uitslag blok
                 let resultBlock = '';
                 if (isPast) {
                     const currentResult = match.result || '';
@@ -402,7 +402,7 @@
                             ${mapsBadge}
                         </div>
                         <h3 class="text-lg font-bold text-slate-800 mt-1.5">vs ${match.opponent}</h3>
-                        ${match.address ? `<p class="text-xs text-slate-400 mt-0.5">🏠 Adres: ${match.address}</p>` : ''}
+                        ${match.address ? `<p class="text-xs text-slate-500 mt-0.5 font-medium">🏠 Adres: <span class="text-slate-700 font-normal">${match.address}</span></p>` : ''}
                         
                         ${absenceBadge}
                         ${resultBlock}
@@ -569,7 +569,7 @@
             let adresRegel = '';
             if (match.venue === 'Uit' && match.address) {
                 const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(match.address)}`;
-                adresRegel = `🏠 *Adres:* ${match.address}\n🗺️ *Google Maps:* ${mapsUrl}\n`;
+                adresRegel = `🏠 *Adres:* ${match.address}\n🗺️ *Google Maps Route:* ${mapsUrl}\n`;
             }
 
             const textTemplate = `🏑 *WEDSTRIJD INFORMATIE* 🏑\n` +
