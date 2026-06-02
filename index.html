@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hockey Taken Planner (Gegarandeerde Cloud)</title>
+    <title>Hockey Taken Planner (Definitief)</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
@@ -23,7 +23,7 @@
             <div id="adminPanel" class="space-y-6 hidden">
                 
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                    <h2 class="text-lg font-bold mb-1 text-slate-700 flex items-center gap-2">🏃‍♂️ Team & Statistieken</h2>
+                    <h2 class="text-lg font-bold mb-1 text-slate-700">🏃‍♂️ Team & Statistieken</h2>
                     <p class="text-xs text-slate-400 mb-3">Groen = Toegewezen taken | Rood = Aantal keer afgemeld.</p>
                     <form id="rosterForm" class="flex gap-2 mb-4">
                         <input type="text" id="playerName" placeholder="Naam speler..." required class="flex-1 px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
@@ -40,10 +40,10 @@
                         <div>
                             <label class="block text-sm font-semibold mb-1.5">Locatie</label>
                             <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
-                                <label class="cursor-pointer text-center py-1.5 text-sm font-medium rounded-lg block has-[:checked]:bg-white has-[:checked]:text-emerald-700 shadow-xs text-slate-600">
+                                <label class="cursor-pointer text-center py-1.5 text-sm font-medium rounded-lg block has-[:checked]:bg-white has-[:checked]:text-emerald-700 text-slate-600">
                                     <input type="radio" name="venue" value="Thuis" checked onchange="toggleAddressField()" class="sr-only"> 🏡 Thuis
                                 </label>
-                                <label class="cursor-pointer text-center py-1.5 text-sm font-medium rounded-lg block has-[:checked]:bg-white has-[:checked]:text-amber-700 shadow-xs text-slate-600">
+                                <label class="cursor-pointer text-center py-1.5 text-sm font-medium rounded-lg block has-[:checked]:bg-white has-[:checked]:text-amber-700 text-slate-600">
                                     <input type="radio" name="venue" value="Uit" onchange="toggleAddressField()" class="sr-only"> 🚌 Uit
                                 </label>
                             </div>
@@ -125,7 +125,7 @@
             <div id="scheduleContainer" class="lg:col-span-3 space-y-8">
                 <div>
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold text-slate-700">Aankomende Wedstrijden & Taken</h2>
+                        <h2 class="text-xl font-bold text-slate-700">Aankomende Wedstrijden &amp; Taken</h2>
                         <span id="matchCount" class="bg-emerald-100 text-emerald-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">0 Wedstrijden</span>
                     </div>
                     <div id="scheduleList" class="space-y-4">
@@ -137,8 +137,8 @@
 
                 <div class="border-t border-slate-200 pt-6">
                     <details class="group bg-slate-100/60 rounded-2xl p-4 border border-slate-200/60" open>
-                        <summary class="flex justify-between items-center font-bold text-slate-600 cursor-pointer list-none">
-                            <span>📜 Gespeelde Wedstrijden <span id="archiveCount" class="text-xs bg-slate-200 px-2 py-0.5 rounded-full">0</span></span>
+                        <summary class="flex justify-between items-center font-bold text-slate-600 cursor-pointer select-none list-none">
+                            <span>📜 Gespeelde Wedstrijden <span id="archiveCount" class="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full">0</span></span>
                             <span class="transition group-open:rotate-180 text-sm">👇</span>
                         </summary>
                         <div id="archiveList" class="space-y-4 mt-4"></div>
@@ -352,7 +352,12 @@
                 const venueB = match.venue === 'Thuis' ? `<span class="bg-emerald-50 text-emerald-700 border text-[11px] font-bold px-2 py-0.5 rounded-md">🏡 THUIS</span>` : `<span class="bg-amber-50 text-amber-700 border text-[11px] font-bold px-2 py-0.5 rounded-md">🚌 UIT</span>`;
                 const fieldB = match.field_number ? `<span class="bg-slate-100 text-slate-600 text-[11px] font-bold px-2 py-0.5 rounded-md">📍 Veld ${match.field_number}</span>` : '';
                 
-                let mapsB = (match.venue === 'Uit' && match.address) ? `<a href="https://maps.google.com/?q=${encodeURIComponent(match.address)}" target="_blank" class="bg-blue-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-md">🗺️ Route</a>` : '';
+                let mapsB = '';
+                if (match.venue === 'Uit' && match.address) {
+                    const cleanAddress = encodeURIComponent(match.address);
+                    mapsB = `<a href="https://maps.google.com/?q=${cleanAddress}" target="_blank" class="bg-blue-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-md">🗺️ Route</a>`;
+                }
+                
                 let absB = match.absences ? `<div class="mt-2 text-xs bg-rose-50 text-rose-700 border px-2.5 py-1 rounded-xl"><span class="font-bold">🚫 Afgemeld:</span> ${match.absences}</div>` : '';
 
                 let resB = '';
@@ -365,48 +370,4 @@
                 }
 
                 let knoppen = isAdmin 
-                    ? `<button onclick="shareMatch(${idx}, true)" class="text-xs bg-slate-800 text-white font-medium px-3 py-1.5 rounded-lg">📲 WhatsApp</button><button onclick="shareMatch(${idx}, false)" class="text-xs bg-slate-100 text-slate-700 font-medium px-3 py-1.5 rounded-lg">📋 Kopieer</button><button onclick="editMatch(${idx})" class="text-xs bg-amber-50 text-amber-700 font-medium px-3 py-1.5 rounded-lg">✏️ Wijzig</button><button onclick="deleteMatch(${idx}, ${match.id || null})" class="text-xs text-rose-500 font-medium px-3 py-1.5 rounded-lg">🗑️ Wis</button>`
-                    : `<button onclick="shareMatch(${idx}, true)" class="text-xs bg-emerald-600 text-white font-medium px-4 py-2 rounded-lg">📲 WhatsApp</button><button onclick="shareMatch(${idx}, false)" class="text-xs bg-slate-100 text-slate-700 font-medium px-4 py-2 rounded-lg">📋 Info</button>`;
-
-                card.innerHTML = `
-                    <div class="flex-1">
-                        <div class="flex flex-wrap items-center gap-2">
-                            <span class="bg-slate-800 text-white font-bold text-xs px-2 py-0.5 rounded-md">⏱️ Verz: ${match.meet_time} u</span>
-                            <span class="bg-emerald-700 text-white font-bold text-xs px-2 py-0.5 rounded-md">🏑 Start: ${match.start_time} u</span>
-                            <span class="text-slate-500 text-sm font-medium capitalize">${fDate}</span>
-                            ${venueB} ${fieldB} ${mapsB}
-                        </div>
-                        <h3 class="text-lg font-bold text-slate-800 mt-1.5">vs ${match.opponent}</h3>
-                        ${match.address ? `<p class="text-xs text-slate-500 mt-0.5">🏠 Adres: ${match.address}</p>` : ''}
-                        ${absB} ${resB}
-                        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-3 pt-3 border-t border-slate-100">
-                            <div class="bg-blue-50/40 p-2 rounded-xl border"><span class="block text-[10px] font-bold text-blue-500">Keeper 🛡️</span><span class="text-xs font-semibold text-slate-700">${match.keeper || '—'}</span></div>
-                            <div class="bg-cyan-50/40 p-2 rounded-xl border"><span class="block text-[10px] font-bold text-cyan-600">Keeper Coach 🧑‍🏫</span><span class="text-xs font-semibold text-slate-700">${match.keeper_coach || '—'}</span></div>
-                            <div class="bg-amber-50/40 p-2 rounded-xl border"><span class="block text-[10px] font-bold text-amber-600">Fruit 🍊</span><span class="text-xs font-semibold text-slate-700">${match.snack || '—'}</span></div>
-                            <div class="bg-purple-50/40 p-2 rounded-xl border"><span class="block text-[10px] font-bold text-purple-500">Scheids 🏁</span><span class="text-xs font-semibold text-slate-700">${match.referee || '—'}</span></div>
-                            <div class="bg-rose-50/40 p-2 rounded-xl border"><span class="block text-[10px] font-bold text-rose-500">Veldcoach 🚐</span><span class="text-xs font-semibold text-slate-700">${match.coach || '—'}</span></div>
-                        </div>
-                    </div>
-                    <div class="flex flex-wrap md:flex-col items-center justify-end gap-2 border-t md:border-t-0 pt-3 md:pt-0">${knoppen}</div>`;
-                
-                if (isPast) { archiveList.appendChild(card); arcCount++; }
-                else { scheduleList.appendChild(card); actCount++; }
-            });
-            emptyState.style.display = actCount === 0 ? 'block' : 'none';
-            matchCount.textContent = `${actCount} Wedstrijden`; archiveCount.textContent = arcCount;
-        }
-
-        // Wijzigen & Verwijderen
-        window.editMatch = function(idx) {
-            const m = matches[idx]; editDbId = m.id || idx;
-            document.getElementById('opponent').value = m.opponent;
-            document.getElementById('fieldNumber').value = m.field_number || '';
-            document.getElementById('matchDate').value = m.match_date;
-            document.getElementById('meetTime').value = m.meet_time;
-            document.getElementById('startTime').value = m.start_time;
-            document.querySelector(`input[name="venue"][value="${m.venue}"]`).checked = true;
-            toggleAddressField();
-            if (m.venue === 'Uit') document.getElementById('matchAddress').value = m.address || '';
-            document.getElementById('matchAbsences').value = m.absences || '';
-            document.getElementById('dutyKeeper').value = m.keeper || '';
-            document.getElementById('dutyKeeperCoach').value = m.keeper_coach ||
+                    ? `<button onclick="shareMatch(${idx}, true)" class="text-xs bg-slate-800 text-white font-medium px-3 py-1.5 rounded-lg">📲 WhatsApp</button><button onclick="shareMatch(${idx}, false)" class="text-xs bg-slate-100 text-slate-700 font-medium px-3 py-1.5 rounded-lg">📋 Kopieer</button><button onclick="editMatch(${idx})" class="text-xs bg-amber-50 text-amber-700 font-medium px-3 py-1.5 rounded-lg">✏️ Wijzig</button><button onclick="deleteMatch(${idx}, ${match.id || null})" class="text-xs text-rose-500 font-medium px-3 py-1.5 rounded-lg">🗑️ Wis</button
