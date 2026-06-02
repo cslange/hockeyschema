@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hockey Taken Planner (Definitief)</title>
+    <title>Hockey Taken Planner (Cloud Live)</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
@@ -125,7 +125,7 @@
             <div id="scheduleContainer" class="lg:col-span-3 space-y-8">
                 <div>
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold text-slate-700">Aankomende Wedstrijden &amp; Taken</h2>
+                        <h2 class="text-xl font-bold text-slate-700">Aankomende Wedstrijden & Taken</h2>
                         <span id="matchCount" class="bg-emerald-100 text-emerald-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">0 Wedstrijden</span>
                     </div>
                     <div id="scheduleList" class="space-y-4">
@@ -138,7 +138,7 @@
                 <div class="border-t border-slate-200 pt-6">
                     <details class="group bg-slate-100/60 rounded-2xl p-4 border border-slate-200/60" open>
                         <summary class="flex justify-between items-center font-bold text-slate-600 cursor-pointer select-none list-none">
-                            <span>📜 Gespeelde Wedstrijden <span id="archiveCount" class="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full">0</span></span>
+                            <span>📜 Gespeelde Wedstrijden <span id="archiveCount" class="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-semibold">0</span></span>
                             <span class="transition group-open:rotate-180 text-sm">👇</span>
                         </summary>
                         <div id="archiveList" class="space-y-4 mt-4"></div>
@@ -282,11 +282,11 @@
                 const item = document.createElement('div');
                 item.className = 'flex items-center justify-between bg-slate-50 border p-2 rounded-xl text-sm font-medium';
                 item.innerHTML = `
-                    <span>${player}</span>
+                    <span>` + player + `</span>
                     <div class="flex items-center gap-1.5">
-                        <span class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2 py-0.5 rounded-full">📊 ${pStat.duties}</span>
-                        <span class="bg-rose-100 text-rose-800 text-[11px] font-bold px-2 py-0.5 rounded-full">🚫 ${pStat.absences}x</span>
-                        <button type="button" onclick="deletePlayer(${index}, '${player}')" class="text-slate-300 hover:text-rose-500 font-bold ml-1">×</button>
+                        <span class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2 py-0.5 rounded-full">📊 ` + pStat.duties + `</span>
+                        <span class="bg-rose-100 text-rose-800 text-[11px] font-bold px-2 py-0.5 rounded-full">🚫 ` + pStat.absences + `x</span>
+                        <button type="button" onclick="deletePlayer(` + index + `, '` + player + `')" class="text-slate-300 hover:text-rose-500 font-bold ml-1">×</button>
                     </div>`;
                 rosterList.appendChild(item);
             });
@@ -355,50 +355,50 @@
                 let mapsB = '';
                 if (match.venue === 'Uit' && match.address) {
                     const cleanAddress = encodeURIComponent(match.address);
-                    mapsB = `<a href="https://maps.google.com/?q=${cleanAddress}" target="_blank" class="bg-blue-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-md">🗺️ Route</a>`;
+                    mapsB = `<a href="https://maps.google.com/?q=$` + cleanAddress + `" target="_blank" class="bg-blue-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-md">🗺️ Route</a>`;
                 }
                 
-                let absB = match.absences ? `<div class="mt-2 text-xs bg-rose-50 text-rose-700 border px-2.5 py-1 rounded-xl"><span class="font-bold">🚫 Afgemeld:</span> ${match.absences}</div>` : '';
+                let absB = match.absences ? `<div class="mt-2 text-xs bg-rose-50 text-rose-700 border px-2.5 py-1 rounded-xl"><span class="font-bold">🚫 Afgemeld:</span> ` + match.absences + `</div>` : '';
 
                 let resB = '';
                 if (isPast) {
                     if (isAdmin) {
-                        resB = `<div class="mt-3 pt-2 border-t border-dashed flex items-center gap-2"><label class="text-xs font-bold text-slate-500 uppercase">🏆 Uitslag:</label><input type="text" value="${match.result || ''}" placeholder="bv 3-1" onchange="saveResult(${match.id || null}, ${idx}, this.value)" class="w-24 px-2 py-1 text-xs border rounded-md text-center bg-white font-bold text-emerald-700"></div>`;
+                        resB = `<div class="mt-3 pt-2 border-t border-dashed flex items-center gap-2"><label class="text-xs font-bold text-slate-500 uppercase">🏆 Uitslag:</label><input type="text" value="` + (match.result || '') + `" placeholder="bv 3-1" onchange="saveResult(` + (match.id || null) + `, ` + idx + `, this.value)" class="w-24 px-2 py-1 text-xs border rounded-md text-center bg-white font-bold text-emerald-700"></div>`;
                     } else if (match.result) {
-                        resB = `<div class="mt-3 pt-2 border-t border-dashed"><span class="bg-emerald-50 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-lg border">🏆 Uitslag: ${match.result}</span></div>`;
+                        resB = `<div class="mt-3 pt-2 border-t border-dashed"><span class="bg-emerald-50 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-lg border">🏆 Uitslag: ` + match.result + `</span></div>`;
                     }
                 }
 
                 let knoppen = isAdmin 
-                    ? `<button onclick="shareMatch(${idx}, true)" class="text-xs bg-slate-800 text-white font-medium px-3 py-1.5 rounded-lg">📲 WhatsApp</button><button onclick="shareMatch(${idx}, false)" class="text-xs bg-slate-100 text-slate-700 font-medium px-3 py-1.5 rounded-lg">📋 Kopieer</button><button onclick="editMatch(${idx})" class="text-xs bg-amber-50 text-amber-700 font-medium px-3 py-1.5 rounded-lg">✏️ Wijzig</button><button onclick="deleteMatch(${idx}, ${match.id || null})" class="text-xs text-rose-500 font-medium px-3 py-1.5 rounded-lg">🗑️ Wis</button>`
-                    : `<button onclick="shareMatch(${idx}, true)" class="text-xs bg-emerald-600 text-white font-medium px-4 py-2 rounded-lg">📲 WhatsApp</button><button onclick="shareMatch(${idx}, false)" class="text-xs bg-slate-100 text-slate-700 font-medium px-4 py-2 rounded-lg">📋 Info</button>`;
+                    ? `<button onclick="shareMatch(` + idx + `, true)" class="text-xs bg-slate-800 text-white font-medium px-3 py-1.5 rounded-lg">📲 WhatsApp</button><button onclick="shareMatch(` + idx + `, false)" class="text-xs bg-slate-100 text-slate-700 font-medium px-3 py-1.5 rounded-lg">📋 Kopieer</button><button onclick="editMatch(` + idx + `)" class="text-xs bg-amber-50 text-amber-700 font-medium px-3 py-1.5 rounded-lg">✏️ Wijzig</button><button onclick="deleteMatch(` + idx + `, ` + (match.id || null) + `)" class="text-xs text-rose-500 font-medium px-3 py-1.5 rounded-lg">🗑️ Wis</button>`
+                    : `<button onclick="shareMatch(` + idx + `, true)" class="text-xs bg-emerald-600 text-white font-medium px-4 py-2 rounded-lg">📲 WhatsApp</button><button onclick="shareMatch(` + idx + `, false)" class="text-xs bg-slate-100 text-slate-700 font-medium px-4 py-2 rounded-lg">📋 Info</button>`;
 
                 card.innerHTML = `
                     <div class="flex-1">
                         <div class="flex flex-wrap items-center gap-2">
-                            <span class="bg-slate-800 text-white font-bold text-xs px-2 py-0.5 rounded-md">⏱️ Verz: ${match.meet_time} u</span>
-                            <span class="bg-emerald-700 text-white font-bold text-xs px-2 py-0.5 rounded-md">🏑 Start: ${match.start_time} u</span>
-                            <span class="text-slate-500 text-sm font-medium capitalize">${fDate}</span>
-                            ${venueB} ${fieldB} ${mapsB}
+                            <span class="bg-slate-800 text-white font-bold text-xs px-2 py-0.5 rounded-md">⏱️ Verz: ` + match.meet_time + ` u</span>
+                            <span class="bg-emerald-700 text-white font-bold text-xs px-2 py-0.5 rounded-md">🏑 Start: ` + match.start_time + ` u</span>
+                            <span class="text-slate-500 text-sm font-medium capitalize">` + fDate + `</span>
+                            ` + venueB + ` ` + fieldB + ` ` + mapsB + `
                         </div>
-                        <h3 class="text-lg font-bold text-slate-800 mt-1.5">vs ${match.opponent}</h3>
-                        ${match.address ? `<p class="text-xs text-slate-500 mt-0.5">🏠 Adres: ${match.address}</p>` : ''}
-                        ${absB} ${resB}
+                        <h3 class="text-lg font-bold text-slate-800 mt-1.5">vs ` + match.opponent + `</h3>
+                        ` + (match.address ? `<p class="text-xs text-slate-500 mt-0.5">🏠 Adres: ` + match.address + `</p>` : '') + `
+                        ` + absB + ` ` + resB + `
                         <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-3 pt-3 border-t border-slate-100">
-                            <div class="bg-blue-50/40 p-2 rounded-xl border"><span class="block text-[10px] font-bold text-blue-500">Keeper 🛡️</span><span class="text-xs font-semibold text-slate-700">${match.keeper || '—'}</span></div>
-                            <div class="bg-cyan-50/40 p-2 rounded-xl border"><span class="block text-[10px] font-bold text-cyan-600">Keeper Coach 🧑‍🏫</span><span class="text-xs font-semibold text-slate-700">${match.keeper_coach || '—'}</span></div>
-                            <div class="bg-amber-50/40 p-2 rounded-xl border"><span class="block text-[10px] font-bold text-amber-600">Fruit 🍊</span><span class="text-xs font-semibold text-slate-700">${match.snack || '—'}</span></div>
-                            <div class="bg-purple-50/40 p-2 rounded-xl border"><span class="block text-[10px] font-bold text-purple-500">Scheids 🏁</span><span class="text-xs font-semibold text-slate-700">${match.referee || '—'}</span></div>
-                            <div class="bg-rose-50/40 p-2 rounded-xl border"><span class="block text-[10px] font-bold text-rose-500">Veldcoach 🚐</span><span class="text-xs font-semibold text-slate-700">${match.coach || '—'}</span></div>
+                            <div class="bg-blue-50/40 p-2 rounded-xl border"><span class="block text-[10px] font-bold text-blue-500">Keeper 🛡️</span><span class="text-xs font-semibold text-slate-700">` + (match.keeper || '—') + `</span></div>
+                            <div class="bg-cyan-50/40 p-2 rounded-xl border"><span class="block text-[10px] font-bold text-cyan-600">Keeper Coach 🧑‍🏫</span><span class="text-xs font-semibold text-slate-700">` + (match.keeper_coach || '—') + `</span></div>
+                            <div class="bg-amber-50/40 p-2 rounded-xl border"><span class="block text-[10px] font-bold text-amber-600">Fruit 🍊</span><span class="text-xs font-semibold text-slate-700">` + (match.snack || '—') + `</span></div>
+                            <div class="bg-purple-50/40 p-2 rounded-xl border"><span class="block text-[10px] font-bold text-purple-500">Scheids 🏁</span><span class="text-xs font-semibold text-slate-700">` + (match.referee || '—') + `</span></div>
+                            <div class="bg-rose-50/40 p-2 rounded-xl border"><span class="block text-[10px] font-bold text-rose-500">Veldcoach 🚐</span><span class="text-xs font-semibold text-slate-700">` + (match.coach || '—') + `</span></div>
                         </div>
                     </div>
-                    <div class="flex flex-wrap md:flex-col items-center justify-end gap-2 border-t md:border-t-0 pt-3 md:pt-0">${knoppen}</div>`;
+                    <div class="flex flex-wrap md:flex-col items-center justify-end gap-2 border-t md:border-t-0 pt-3 md:pt-0">` + knoppen + `</div>`;
                 
                 if (isPast) { archiveList.appendChild(card); arcCount++; }
                 else { scheduleList.appendChild(card); actCount++; }
             });
             emptyState.style.display = actCount === 0 ? 'block' : 'none';
-            matchCount.textContent = `${actCount} Wedstrijden`; archiveCount.textContent = arcCount;
+            matchCount.textContent = actCount + ` Wedstrijden`; archiveCount.textContent = arcCount;
         }
 
         // Wijzigen & Verwijderen
@@ -409,7 +409,7 @@
             document.getElementById('matchDate').value = m.match_date;
             document.getElementById('meetTime').value = m.meet_time;
             document.getElementById('startTime').value = m.start_time;
-            document.querySelector(`input[name="venue"][value="${m.venue}"]`).checked = true;
+            document.querySelector(`input[name="venue"][value="` + m.venue + `"]`).checked = true;
             toggleAddressField();
             if (m.venue === 'Uit') document.getElementById('matchAddress').value = m.address || '';
             document.getElementById('matchAbsences').value = m.absences || '';
@@ -479,19 +479,19 @@
         window.shareMatch = function(idx, launchWhatsApp) {
             const m = matches[idx]; if (!m) return;
             const fDate = new Date(m.match_date).toLocaleDateString('nl-NL', { weekday: 'long', month: 'long', day: 'numeric' });
-            const vRegel = m.field_number ? `📍 *Veld:* Veld ${m.field_number}\n` : '';
-            const uRegel = m.result ? `🏆 *Uitslag:* ${m.result}\n` : '';
-            const aRegel = m.absences ? `🚫 *Afgemeld:* ${m.absences}\n` : '';
+            const vRegel = m.field_number ? `📍 *Veld:* Veld ` + m.field_number + `\n` : '';
+            const uRegel = m.result ? `🏆 *Uitslag:* ` + m.result + `\n` : '';
+            const aRegel = m.absences ? `🚫 *Afgemeld:* ` + m.absences + `\n` : '';
             
             let adRegel = '';
             if (m.venue === 'Uit' && m.address) {
                 const cleanAddress = encodeURIComponent(m.address);
-                adRegel = `🏠 *Adres:* ${m.address}\n🗺 *Google Maps:* https://maps.google.com/?q=${cleanAddress}\n`;
+                adRegel = `🏠 *Adres:* ` + m.address + `\n🗺 *Google Maps:* https://maps.google.com/?q=$` + cleanAddress + `\n`;
             }
 
-            const tekst = `🏑 *WEDSTRIJD INFORMATIE* 🏑\n---------------------------\n🆚 *Tegenstander:* vs ${m.opponent} (${m.venue})\n📅 *Datum:* ${fDate}\n⏱️ *Verzamelen:* ${m.meet_time} uur\n🏑 *Aanvang:* ${m.start_time} uur\n` + vRegel + adRegel + uRegel + aRegel + `\n📋 *TAAKVERDELING:*\n🛡️ *Keeper:* ${m.keeper || 'Nog invullen'}\n🧑‍🏫 *Keeper Coach:* ${m.keeper_coach || 'Nog invullen'}\n🍊 *Fruit/Snacks:* ${m.snack || 'Nog invullen'}\n🏁 *Scheidsrechter:* ${m.referee || 'Nog invullen'}\n🚐 *Veldcoach:* ${m.coach || 'Nog invullen'}\n---------------------------`;
+            const tekst = `🏑 *WEDSTRIJD INFORMATIE* 🏑\n---------------------------\n🆚 *Tegenstander:* vs ` + m.opponent + ` (` + m.venue + `)\n📅 *Datum:* ` + fDate + `\n⏱️ *Verzamelen:* ` + m.meet_time + ` uur\n🏑 *Aanvang:* ` + m.start_time + ` uur\n` + vRegel + adRegel + uRegel + aRegel + `\n📋 *TAAKVERDELING:*\n🛡️ *Keeper:* ` + (m.keeper || 'Nog invullen') + `\n🧑‍🏫 *Keeper Coach:* ` + (m.keeper_coach || 'Nog invullen') + `\n🍊 *Fruit/Snacks:* ` + (m.snack || 'Nog invullen') + `\n🏁 *Scheidsrechter:* ` + (m.referee || 'Nog invullen') + `\n🚐 *Veldcoach:* ` + (m.coach || 'Nog invullen') + `\n---------------------------`;
 
-            if (launchWhatsApp) window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(tekst)}`, '_blank');
+            if (launchWhatsApp) window.open(`https://api.whatsapp.com/send?text=` + encodeURIComponent(tekst), '_blank');
             else navigator.clipboard.writeText(tekst).then(() => alert('✨ Gekopieerd!'));
         };
 
