@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hockey Taken Planner (Cloud Live)</title>
+    <title>Hockey Taken Planner (Gegarandeerde Cloud)</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.4/dist/umd/supabase.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans p-4 md:p-8">
 
@@ -24,7 +24,7 @@
                 
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
                     <h2 class="text-lg font-bold mb-1 text-slate-700 flex items-center gap-2">🏃‍♂️ Team & Statistieken</h2>
-                    <p class="text-xs text-slate-400 mb-3">Groen = Uitgevoerde taken | Rood = Aantal keer afgemeld.</p>
+                    <p class="text-xs text-slate-400 mb-3">Groen = Toegewezen taken | Rood = Aantal keer afgemeld.</p>
                     <form id="rosterForm" class="flex gap-2 mb-4">
                         <input type="text" id="playerName" placeholder="Naam speler..." required class="flex-1 px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
                         <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium px-3 py-1.5 rounded-lg transition">Toevoegen</button>
@@ -82,42 +82,39 @@
                         </div>
 
                         <div class="border-t border-slate-100 pt-3">
-                            <label class="block text-sm font-bold text-slate-600 mb-1.5">Afmeldingen voor deze pot 🚫</label>
-                            <div id="formAbsencesList" class="flex flex-wrap gap-2 max-h-24 overflow-y-auto p-1 bg-slate-50 rounded-xl border border-slate-100">
-                                </div>
+                            <label class="block text-sm font-bold text-slate-600 mb-1">Afmeldingen (Namen met komma's)</label>
+                            <input type="text" id="matchAbsences" placeholder="bijv. Sophie, Daan" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
 
-                        <div class="border-t border-slate-100 pt-3">
+                        <div class="border-t border-slate-100 pt-3 space-y-3">
                             <label class="block text-sm font-bold text-slate-600 mb-2">Taakverdeling</label>
-                            <div class="space-y-3">
-                                <div>
-                                    <label class="block text-xs font-medium text-slate-500">Keeper 🛡️</label>
-                                    <select id="dutyKeeper" class="duty-select w-full px-3 py-1.5 text-sm border border-slate-200 rounded-md bg-white"></select>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-slate-500">Keeper Coach 🧑‍🏫</label>
-                                    <select id="dutyKeeperCoach" class="duty-select w-full px-3 py-1.5 text-sm border border-slate-200 rounded-md bg-white"></select>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-slate-500">Fruit / Snacks 🍊</label>
-                                    <select id="dutySnack" class="duty-select w-full px-3 py-1.5 text-sm border border-slate-200 rounded-md bg-white"></select>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-slate-500">Scheidsrechter 🏁</label>
-                                    <select id="dutyReferee" class="duty-select w-full px-3 py-1.5 text-sm border border-slate-200 rounded-md bg-white"></select>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-slate-500">Veldcoach 🚐</label>
-                                    <select id="dutyCoach" class="duty-select w-full px-3 py-1.5 text-sm border border-slate-200 rounded-md bg-white"></select>
-                                </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500">Keeper 🛡️</label>
+                                <select id="dutyKeeper" class="duty-select w-full px-3 py-1.5 text-sm border border-slate-200 rounded-md bg-white"></select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500">Keeper Coach 🧑‍🏫</label>
+                                <select id="dutyKeeperCoach" class="duty-select w-full px-3 py-1.5 text-sm border border-slate-200 rounded-md bg-white"></select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500">Fruit / Snacks 🍊</label>
+                                <select id="dutySnack" class="duty-select w-full px-3 py-1.5 text-sm border border-slate-200 rounded-md bg-white"></select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500">Scheidsrechter 🏁</label>
+                                <select id="dutyReferee" class="duty-select w-full px-3 py-1.5 text-sm border border-slate-200 rounded-md bg-white"></select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500">Veldcoach 🚐</label>
+                                <select id="dutyCoach" class="duty-select w-full px-3 py-1.5 text-sm border border-slate-200 rounded-md bg-white"></select>
                             </div>
                         </div>
 
                         <div class="space-y-2 pt-2">
-                            <button type="submit" id="submitBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg transition duration-200 shadow-sm">
+                            <button type="submit" id="submitBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg shadow-sm">
                                 Toevoegen aan Schema
                             </button>
-                            <button type="button" id="cancelEditBtn" onclick="resetFormState()" class="w-full hidden bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium py-2 rounded-lg transition duration-200">
+                            <button type="button" id="cancelEditBtn" onclick="resetFormState()" class="w-full hidden bg-slate-100 text-slate-600 py-2 rounded-lg">
                                 Annuleren
                             </button>
                         </div>
@@ -133,16 +130,15 @@
                     </div>
                     <div id="scheduleList" class="space-y-4">
                         <div id="emptyState" class="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200 text-slate-400">
-                            <span class="text-4xl">📅</span>
-                            <p class="mt-2 text-sm">Er zijn momenteel geen aankomende wedstrijden ingepland.</p>
+                            <p class="text-sm">Er zijn momenteel geen aankomende wedstrijden ingepland.</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="border-t border-slate-200 pt-6">
                     <details class="group bg-slate-100/60 rounded-2xl p-4 border border-slate-200/60" open>
-                        <summary class="flex justify-between items-center font-bold text-slate-600 cursor-pointer select-none list-none">
-                            <span class="flex items-center gap-2">📜 Gespeelde Wedstrijden <span id="archiveCount" class="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-semibold">0</span></span>
+                        <summary class="flex justify-between items-center font-bold text-slate-600 cursor-pointer list-none">
+                            <span>📜 Gespeelde Wedstrijden <span id="archiveCount" class="text-xs bg-slate-200 px-2 py-0.5 rounded-full">0</span></span>
                             <span class="transition group-open:rotate-180 text-sm">👇</span>
                         </summary>
                         <div id="archiveList" class="space-y-4 mt-4"></div>
@@ -154,32 +150,39 @@
     </div>
 
     <script>
-        // --- GEGEVENS GEBASEERD OP JOUW SCREENSHOTS ---
+        // --- JOUW SUPABASE INSTELLINGEN ---
         const SUPABASE_URL = "https://beycpbzfyjmrikbtwjzo.supabase.co"; 
         const SUPABASE_ANON_KEY = "sb_publishable_ePuwhXWJyvina35-BKCXsA_j9aUvYEA"; 
-        
-        // Correcte initialisatie voor de v2-bibliotheek
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let supabase = null;
+        let useCloud = false;
+
+        // Probeer de client veilig te initialiseren
+        try {
+            if (window.supabase && window.supabase.createClient) {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                useCloud = true;
+            }
+        } catch(e) {
+            console.warn("Cloud initialisatie mislukt, switch naar lokaal:", e);
+        }
 
         const urlParams = new URLSearchParams(window.location.search);
         const isAdmin = urlParams.get('admin') === 'ja';
 
         let matches = [];
-        let roster = [];
+        let roster = ['Nog niet toegewezen'];
         let editDbId = null;
 
         const adminPanel = document.getElementById('adminPanel');
         const scheduleContainer = document.getElementById('scheduleContainer');
         const appSubtitle = document.getElementById('appSubtitle');
         const modeBadge = document.getElementById('modeBadge');
-        
         const matchForm = document.getElementById('matchForm');
         const formTitle = document.getElementById('formTitle');
         const submitBtn = document.getElementById('submitBtn');
         const cancelEditBtn = document.getElementById('cancelEditBtn');
         const addressFieldContainer = document.getElementById('addressFieldContainer');
-        const formAbsencesList = document.getElementById('formAbsencesList');
-        
         const rosterForm = document.getElementById('rosterForm');
         const rosterList = document.getElementById('rosterList');
         const scheduleList = document.getElementById('scheduleList');
@@ -189,14 +192,13 @@
         const archiveCount = document.getElementById('archiveCount');
         const dutySelects = document.querySelectorAll('.duty-select');
 
+        // Modus instellen
         if (isAdmin) {
             adminPanel.classList.remove('hidden');
             scheduleContainer.classList.replace('lg:col-span-3', 'lg:col-span-2');
-            appSubtitle.textContent = "Beheer de spelerslijst, uitslagen, afmeldingen en teamtaken via de Cloud.";
             modeBadge.textContent = "🛠️ MANAGER MODUS";
             modeBadge.className = "text-xs font-bold px-3 py-1 rounded-full bg-purple-100 text-purple-800";
         } else {
-            appSubtitle.textContent = "Actueel overzicht van alle aankomende wedstrijden, uitslagen en teamtaken.";
             modeBadge.textContent = "👀 OUDER OVERZICHT";
             modeBadge.className = "text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-600";
         }
@@ -210,35 +212,50 @@
             }
         };
 
-        async function loadDataFromCloud() {
-            try {
-                const { data: rosterData, error: rErr } = await supabase.from('roster').select('name').order('id', { ascending: true });
-                if (rErr) throw rErr;
-                roster = rosterData.map(r => r.name);
-
-                const { data: matchData, error: mErr } = await supabase.from('matches').select('*');
-                if (mErr) throw mErr;
-                matches = matchData || [];
-
-                renderRoster();
-                renderSchedule();
-            } catch (err) {
-                console.error("Cloud connectiefout:", err);
-                document.getElementById('appSubtitle').textContent = "⚠️ Database verbindingsfout. Controleer de SQL instellingen.";
+        // --- HOOFDFUNCTIE: INLADEN DATA ---
+        async function loadData() {
+            if (useCloud && supabase) {
+                try {
+                    // Haal spelers op
+                    const { data: rData, error: rErr } = await supabase.from('roster').select('name').order('id', {ascending: true});
+                    if (!rErr && rData) {
+                        roster = rData.map(r => r.name);
+                    }
+                    // Haal wedstrijden op
+                    const { data: mData, error: mErr } = await supabase.from('matches').select('*');
+                    if (!mErr && mData) {
+                        matches = mData;
+                    }
+                    appSubtitle.textContent = isAdmin ? "Beheer de spelerslijst, uitslagen en teamtaken via de Cloud." : "Actueel overzicht van alle wedstrijden en jouw teamtaken.";
+                } catch(err) {
+                    console.error("Fout tijdens cloud-fetch, we laden lokaal backup:", err);
+                    loadLocalFallback();
+                }
+            } else {
+                loadLocalFallback();
             }
+            renderRoster();
+            renderSchedule();
         }
 
+        function loadLocalFallback() {
+            matches = JSON.parse(localStorage.getItem('hockeySchedule')) || [];
+            roster = JSON.parse(localStorage.getItem('hockeyRoster')) || ['Nog niet toegewezen'];
+            appSubtitle.textContent = "Offline Modus: Gegevens worden tijdelijk onthouden op dit apparaat.";
+            if(modeBadge.textContent.includes("Laden")) modeBadge.textContent = isAdmin ? "🛠️ MANAGER (OFFLINE)" : "👀 OUDER (OFFLINE)";
+        }
+
+        // --- STATISTIEKEN BEREKENEN ---
         function calculateStats() {
             const stats = {};
-            roster.forEach(player => { if(player !== 'Nog niet toegewezen') stats[player] = { duties: 0, absences: 0 }; });
-            matches.forEach(match => {
-                ['keeper', 'keeper_coach', 'snack', 'referee', 'coach'].forEach(key => {
-                    const p = match[key];
-                    if (p && stats[p] !== undefined) stats[p].duties++;
+            roster.forEach(p => { if(p !== 'Nog niet toegewezen') stats[p] = { duties: 0, absences: 0 }; });
+            matches.forEach(m => {
+                ['keeper', 'keeper_coach', 'snack', 'referee', 'coach'].forEach(k => {
+                    if(m[k] && stats[m[k]]) stats[m[k]].duties++;
                 });
-                if (match.absences) {
-                    roster.forEach(player => {
-                        if (player !== 'Nog niet toegewezen' && match.absences.includes(player)) stats[player].absences++;
+                if (m.absences) {
+                    roster.forEach(p => {
+                        if (p !== 'Nog niet toegewezen' && m.absences.includes(p)) stats[p].absences++;
                     });
                 }
             });
@@ -248,123 +265,120 @@
         function renderRoster() {
             const stats = calculateStats();
             dutySelects.forEach(select => {
-                const currentVal = select.value;
-                select.innerHTML = '';
-                roster.forEach(player => {
+                const cur = select.value; select.innerHTML = '';
+                roster.forEach(p => {
                     const opt = document.createElement('option');
-                    opt.value = player === 'Nog niet toegewezen' ? '' : player;
-                    opt.textContent = player;
-                    select.appendChild(opt);
+                    opt.value = p === 'Nog niet toegewezen' ? '' : p;
+                    opt.textContent = p; select.appendChild(opt);
                 });
-                select.value = currentVal;
+                select.value = cur;
             });
 
-            formAbsencesList.innerHTML = '';
-            let validPlayersCount = 0;
-            roster.forEach((player) => {
-                if (player === 'Nog niet toegewezen') return;
-                validPlayersCount++;
-                const label = document.createElement('label');
-                label.className = "inline-flex items-center gap-1 bg-white border px-2 py-1 rounded-lg text-xs font-medium cursor-pointer text-slate-600 select-none";
-                label.innerHTML = `<input type="checkbox" name="absentPlayers" value="${player}" class="rounded text-rose-600"> ${player}`;
-                formAbsencesList.appendChild(label);
-            });
-
-            if (!isAdmin) return; 
-
+            if (!isAdmin) return;
             rosterList.innerHTML = '';
             roster.forEach((player, index) => {
-                if (index === 0) return; 
-                const playerStat = stats[player] || { duties: 0, absences: 0 };
+                if (index === 0) return;
+                const pStat = stats[player] || { duties: 0, absences: 0 };
                 const item = document.createElement('div');
                 item.className = 'flex items-center justify-between bg-slate-50 border p-2 rounded-xl text-sm font-medium';
                 item.innerHTML = `
                     <span>${player}</span>
                     <div class="flex items-center gap-1.5">
-                        <span class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2 py-0.5 rounded-full">📊 ${playerStat.duties}</span>
-                        <span class="bg-rose-100 text-rose-800 text-[11px] font-bold px-2 py-0.5 rounded-full">🚫 ${playerStat.absences}x</span>
-                        <button type="button" onclick="deletePlayerFromCloud('${player}')" class="text-slate-300 hover:text-rose-500 font-bold ml-1">×</button>
-                    </div>
-                `;
+                        <span class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2 py-0.5 rounded-full">📊 ${pStat.duties}</span>
+                        <span class="bg-rose-100 text-rose-800 text-[11px] font-bold px-2 py-0.5 rounded-full">🚫 ${pStat.absences}x</span>
+                        <button type="button" onclick="deletePlayer(${index}, '${player}')" class="text-slate-300 hover:text-rose-500 font-bold ml-1">×</button>
+                    </div>`;
                 rosterList.appendChild(item);
             });
         }
 
+        // Speler Toevoegen
         if (isAdmin) {
             rosterForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const nameInput = document.getElementById('playerName');
-                const name = nameInput.value.trim();
+                const inp = document.getElementById('playerName');
+                const name = inp.value.trim();
                 if (name && !roster.includes(name)) {
-                    await supabase.from('roster').insert([{ name: name }]);
-                    nameInput.value = '';
-                    await loadDataFromCloud();
+                    if (useCloud && supabase) {
+                        await supabase.from('roster').insert([{ name: name }]);
+                    } else {
+                        roster.push(name);
+                        localStorage.setItem('hockeyRoster', JSON.stringify(roster));
+                    }
+                    inp.value = ''; await loadData();
                 }
             });
-            window.deletePlayerFromCloud = async function(playerName) {
-                if(confirm(`Speler ${playerName} verwijderen?`)) {
-                    await supabase.from('roster').delete().eq('name', playerName);
-                    await loadDataFromCloud();
+
+            window.deletePlayer = async function(index, name) {
+                if(confirm(`Speler ${name} verwijderen?`)) {
+                    if (useCloud && supabase) {
+                        await supabase.from('roster').delete().eq('name', name);
+                    } else {
+                        roster.splice(index, 1);
+                        localStorage.setItem('hockeyRoster', JSON.stringify(roster));
+                    }
+                    await loadData();
                 }
             };
         }
 
-        window.saveResultToCloud = async function(dbId, scoreValue) {
-            await supabase.from('matches').update({ result: scoreValue.trim() }).eq('id', dbId);
-            const m = matches.find(x => x.id === dbId);
-            if (m) m.result = scoreValue.trim();
+        // Uitslag Opslaan
+        window.saveResult = async function(dbId, originalIdx, value) {
+            if (useCloud && supabase && dbId) {
+                await supabase.from('matches').update({ result: value.trim() }).eq('id', dbId);
+            } else {
+                matches[originalIdx].result = value.trim();
+                localStorage.setItem('hockeySchedule', JSON.stringify(matches));
+            }
         };
 
+        // --- OVERZICHT RENDEREN ---
         function renderSchedule() {
             scheduleList.querySelectorAll('.match-card').forEach(c => c.remove());
             archiveList.querySelectorAll('.match-card').forEach(c => c.remove());
             const today = new Date(); today.setHours(0,0,0,0);
 
-            matches.sort((a, b) => new Date(`${a.match_date}T${a.start_time}`) - new Date(`${b.match_date}T${b.start_time}`));
-            let activeCount = 0; let archivedCount = 0;
+            matches.sort((a,b) => new Date(`${a.match_date}T${a.start_time}`) - new Date(`${b.match_date}T${b.start_time}`));
+            let actCount = 0; let arcCount = 0;
 
-            matches.forEach((match) => {
-                const matchDateObj = new Date(match.match_date); matchDateObj.setHours(0,0,0,0);
-                const isPast = matchDateObj < today;
+            matches.forEach((match, idx) => {
+                const mDate = new Date(match.match_date); mDate.setHours(0,0,0,0);
+                const isPast = mDate < today;
 
                 const card = document.createElement('div');
                 card.className = `match-card p-5 rounded-2xl border flex flex-col md:flex-row gap-4 justify-between ${isPast ? 'bg-slate-50 border-slate-200' : 'bg-white border-slate-100'}`;
                 
-                const formattedDate = new Date(match.match_date).toLocaleDateString('nl-NL', { weekday: 'short', month: 'short', day: 'numeric' });
-                const venueBadge = match.venue === 'Thuis' ? `<span class="bg-emerald-50 text-emerald-700 border text-[11px] font-bold px-2 py-0.5 rounded-md">🏡 THUIS</span>` : `<span class="bg-amber-50 text-amber-700 border text-[11px] font-bold px-2 py-0.5 rounded-md">🚌 UIT</span>`;
-                const fieldBadge = match.field_number ? `<span class="bg-slate-100 text-slate-600 text-[11px] font-bold px-2 py-0.5 rounded-md">📍 Veld ${match.field_number}</span>` : '';
+                const fDate = new Date(match.match_date).toLocaleDateString('nl-NL', { weekday: 'short', month: 'short', day: 'numeric' });
+                const venueB = match.venue === 'Thuis' ? `<span class="bg-emerald-50 text-emerald-700 border text-[11px] font-bold px-2 py-0.5 rounded-md">🏡 THUIS</span>` : `<span class="bg-amber-50 text-amber-700 border text-[11px] font-bold px-2 py-0.5 rounded-md">🚌 UIT</span>`;
+                const fieldB = match.field_number ? `<span class="bg-slate-100 text-slate-600 text-[11px] font-bold px-2 py-0.5 rounded-md">📍 Veld ${match.field_number}</span>` : '';
                 
-                let mapsBadge = '';
-                if (match.venue === 'Uit' && match.address) {
-                    mapsBadge = `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(match.address)}" target="_blank" class="bg-blue-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-md">🗺️ Route</a>`;
-                }
+                let mapsB = (match.venue === 'Uit' && match.address) ? `<a href="https://maps.google.com/?q=${encodeURIComponent(match.address)}" target="_blank" class="bg-blue-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-md">🗺️ Route</a>` : '';
+                let absB = match.absences ? `<div class="mt-2 text-xs bg-rose-50 text-rose-700 border px-2.5 py-1 rounded-xl"><span class="font-bold">🚫 Afgemeld:</span> ${match.absences}</div>` : '';
 
-                let absenceBadge = match.absences ? `<div class="mt-2 text-xs bg-rose-50 text-rose-700 border px-2.5 py-1 rounded-xl"><span class="font-bold">🚫 Afgemeld:</span> ${match.absences}</div>` : '';
-
-                let resultBlock = '';
+                let resB = '';
                 if (isPast) {
                     if (isAdmin) {
-                        resultBlock = `<div class="mt-3 pt-2 border-t border-dashed flex items-center gap-2"><label class="text-xs font-bold text-slate-500 uppercase">🏆 Uitslag:</label><input type="text" value="${match.result || ''}" placeholder="3 - 1" onchange="saveResultToCloud(${match.id}, this.value)" class="w-24 px-2 py-1 text-xs border rounded-md text-center bg-white font-bold text-emerald-700"></div>`;
+                        resB = `<div class="mt-3 pt-2 border-t border-dashed flex items-center gap-2"><label class="text-xs font-bold text-slate-500 uppercase">🏆 Uitslag:</label><input type="text" value="${match.result || ''}" placeholder="bv 3-1" onchange="saveResult(${match.id || null}, ${idx}, this.value)" class="w-24 px-2 py-1 text-xs border rounded-md text-center bg-white font-bold text-emerald-700"></div>`;
                     } else if (match.result) {
-                        resultBlock = `<div class="mt-3 pt-2 border-t border-dashed"><span class="bg-emerald-50 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-lg border">🏆 Uitslag: ${match.result}</span></div>`;
+                        resB = `<div class="mt-3 pt-2 border-t border-dashed"><span class="bg-emerald-50 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-lg border">🏆 Uitslag: ${match.result}</span></div>`;
                     }
                 }
 
-                let actieKnoppen = isAdmin 
-                    ? `<button onclick="shareMatchById(${match.id}, true)" class="text-xs bg-slate-800 text-white font-medium px-3 py-1.5 rounded-lg">📲 WhatsApp</button><button onclick="shareMatchById(${match.id}, false)" class="text-xs bg-slate-100 text-slate-700 font-medium px-3 py-1.5 rounded-lg">📋 Kopieer</button><button onclick="startEditMatchFromDb(${match.id})" class="text-xs bg-amber-50 text-amber-700 font-medium px-3 py-1.5 rounded-lg">✏️ Wijzig</button><button onclick="deleteMatchFromCloud(${match.id})" class="text-xs text-rose-500 font-medium px-3 py-1.5 rounded-lg">🗑️ Wis</button>`
-                    : `<button onclick="shareMatchById(${match.id}, true)" class="text-xs bg-emerald-600 text-white font-medium px-4 py-2 rounded-lg">📲 WhatsApp</button><button onclick="shareMatchById(${match.id}, false)" class="text-xs bg-slate-100 text-slate-700 font-medium px-4 py-2 rounded-lg">📋 Info</button>`;
+                let knoppen = isAdmin 
+                    ? `<button onclick="shareMatch(${idx}, true)" class="text-xs bg-slate-800 text-white font-medium px-3 py-1.5 rounded-lg">📲 WhatsApp</button><button onclick="shareMatch(${idx}, false)" class="text-xs bg-slate-100 text-slate-700 font-medium px-3 py-1.5 rounded-lg">📋 Kopieer</button><button onclick="editMatch(${idx})" class="text-xs bg-amber-50 text-amber-700 font-medium px-3 py-1.5 rounded-lg">✏️ Wijzig</button><button onclick="deleteMatch(${idx}, ${match.id || null})" class="text-xs text-rose-500 font-medium px-3 py-1.5 rounded-lg">🗑️ Wis</button>`
+                    : `<button onclick="shareMatch(${idx}, true)" class="text-xs bg-emerald-600 text-white font-medium px-4 py-2 rounded-lg">📲 WhatsApp</button><button onclick="shareMatch(${idx}, false)" class="text-xs bg-slate-100 text-slate-700 font-medium px-4 py-2 rounded-lg">📋 Info</button>`;
 
                 card.innerHTML = `
                     <div class="flex-1">
                         <div class="flex flex-wrap items-center gap-2">
                             <span class="bg-slate-800 text-white font-bold text-xs px-2 py-0.5 rounded-md">⏱️ Verz: ${match.meet_time} u</span>
                             <span class="bg-emerald-700 text-white font-bold text-xs px-2 py-0.5 rounded-md">🏑 Start: ${match.start_time} u</span>
-                            <span class="text-slate-500 text-sm font-medium capitalize">${formattedDate}</span>
-                            ${venueBadge} ${fieldBadge} ${mapsBadge}
+                            <span class="text-slate-500 text-sm font-medium capitalize">${fDate}</span>
+                            ${venueB} ${fieldB} ${mapsB}
                         </div>
                         <h3 class="text-lg font-bold text-slate-800 mt-1.5">vs ${match.opponent}</h3>
                         ${match.address ? `<p class="text-xs text-slate-500 mt-0.5">🏠 Adres: ${match.address}</p>` : ''}
-                        ${absenceBadge} ${resultBlock}
+                        ${absB} ${resB}
                         <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-3 pt-3 border-t border-slate-100">
                             <div class="bg-blue-50/40 p-2 rounded-xl border"><span class="block text-[10px] font-bold text-blue-500">Keeper 🛡️</span><span class="text-xs font-semibold text-slate-700">${match.keeper || '—'}</span></div>
                             <div class="bg-cyan-50/40 p-2 rounded-xl border"><span class="block text-[10px] font-bold text-cyan-600">Keeper Coach 🧑‍🏫</span><span class="text-xs font-semibold text-slate-700">${match.keeper_coach || '—'}</span></div>
@@ -373,70 +387,26 @@
                             <div class="bg-rose-50/40 p-2 rounded-xl border"><span class="block text-[10px] font-bold text-rose-500">Veldcoach 🚐</span><span class="text-xs font-semibold text-slate-700">${match.coach || '—'}</span></div>
                         </div>
                     </div>
-                    <div class="flex flex-wrap md:flex-col items-center justify-end gap-2 border-t md:border-t-0 pt-3 md:pt-0">${actieKnoppen}</div>
-                `;
-                if (isPast) { archiveList.appendChild(card); archivedCount++; }
-                else { scheduleList.appendChild(card); activeCount++; }
+                    <div class="flex flex-wrap md:flex-col items-center justify-end gap-2 border-t md:border-t-0 pt-3 md:pt-0">${knoppen}</div>`;
+                
+                if (isPast) { archiveList.appendChild(card); arcCount++; }
+                else { scheduleList.appendChild(card); actCount++; }
             });
-            emptyState.style.display = activeCount === 0 ? 'block' : 'none';
-            matchCount.textContent = `${activeCount} Wedstrijden`; archiveCount.textContent = archivedCount;
+            emptyState.style.display = actCount === 0 ? 'block' : 'none';
+            matchCount.textContent = `${actCount} Wedstrijden`; archiveCount.textContent = arcCount;
         }
 
-        window.startEditMatchFromDb = function(dbId) {
-            editDbId = dbId; const match = matches.find(x => x.id === dbId); if (!match) return;
-            document.getElementById('opponent').value = match.opponent;
-            document.getElementById('fieldNumber').value = match.field_number || '';
-            document.getElementById('matchDate').value = match.match_date;
-            document.getElementById('meetTime').value = match.meet_time;
-            document.getElementById('startTime').value = match.start_time;
-            document.querySelector(`input[name="venue"][value="${match.venue}"]`).checked = true;
+        // Wijzigen & Verwijderen
+        window.editMatch = function(idx) {
+            const m = matches[idx]; editDbId = m.id || idx;
+            document.getElementById('opponent').value = m.opponent;
+            document.getElementById('fieldNumber').value = m.field_number || '';
+            document.getElementById('matchDate').value = m.match_date;
+            document.getElementById('meetTime').value = m.meet_time;
+            document.getElementById('startTime').value = m.start_time;
+            document.querySelector(`input[name="venue"][value="${m.venue}"]`).checked = true;
             toggleAddressField();
-            if (match.venue === 'Uit') document.getElementById('matchAddress').value = match.address || '';
-            
-            // Zet checkboxes voor afmeldingen
-            document.querySelectorAll('input[name="absentPlayers"]').forEach(cb => {
-                cb.checked = match.absences && match.absences.includes(cb.value);
-            });
-
-            document.getElementById('dutyKeeper').value = match.keeper || '';
-            document.getElementById('dutyKeeperCoach').value = match.keeper_coach || '';
-            document.getElementById('dutySnack').value = match.snack || '';
-            document.getElementById('dutyReferee').value = match.referee || '';
-            document.getElementById('dutyCoach').value = match.coach || '';
-            formTitle.textContent = "Wedstrijd Wijzigen"; submitBtn.textContent = "Wijziging Opslaan";
-            cancelEditBtn.classList.remove('hidden');
-        };
-
-        window.resetFormState = function() {
-            editDbId = null; matchForm.reset(); formTitle.textContent = "Nieuwe Wedstrijd";
-            submitBtn.textContent = "Toevoegen aan Schema"; cancelEditBtn.classList.add('hidden');
-            document.querySelector('input[name="venue"][value="Thuis"]').checked = true; toggleAddressField();
-            document.querySelectorAll('input[name="absentPlayers"]').forEach(cb => cb.checked = false);
-        };
-
-        if (isAdmin) {
-            matchForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const venueValue = document.querySelector('input[name="venue"]:checked').value;
-                
-                const absentPlayers = [];
-                document.querySelectorAll('input[name="absentPlayers"]:checked').forEach(cb => absentPlayers.push(cb.value));
-
-                const matchData = {
-                    opponent: document.getElementById('opponent').value,
-                    field_number: document.getElementById('fieldNumber').value.trim(),
-                    address: venueValue === 'Uit' ? document.getElementById('matchAddress').value.trim() : '',
-                    match_date: document.getElementById('matchDate').value,
-                    meet_time: document.getElementById('meetTime').value,
-                    start_time: document.getElementById('startTime').value,
-                    venue: venueValue,
-                    absences: absentPlayers.join(', '),
-                    keeper: document.getElementById('dutyKeeper').value,
-                    keeper_coach: document.getElementById('dutyKeeperCoach').value,
-                    snack: document.getElementById('dutySnack').value,
-                    referee: document.getElementById('dutyReferee').value,
-                    coach: document.getElementById('dutyCoach').value
-                };
-                if (editDbId !== null) await supabase.from('matches').update(matchData).eq('id', editDbId);
-                else await supabase.from('matches').insert([matchData]);
-                resetFormState();
+            if (m.venue === 'Uit') document.getElementById('matchAddress').value = m.address || '';
+            document.getElementById('matchAbsences').value = m.absences || '';
+            document.getElementById('dutyKeeper').value = m.keeper || '';
+            document.getElementById('dutyKeeperCoach').value = m.keeper_coach ||
