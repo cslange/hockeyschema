@@ -370,4 +370,141 @@
                 }
 
                 let knoppen = isAdmin 
-                    ? `<button onclick="shareMatch(${idx}, true)" class="text-xs bg-slate-800 text-white font-medium px-3 py-1.5 rounded-lg">📲 WhatsApp</button><button onclick="shareMatch(${idx}, false)" class="text-xs bg-slate-100 text-slate-700 font-medium px-3 py-1.5 rounded-lg">📋 Kopieer</button><button onclick="editMatch(${idx})" class="text-xs bg-amber-50 text-amber-700 font-medium px-3 py-1.5 rounded-lg">✏️ Wijzig</button><button onclick="deleteMatch(${idx}, ${match.id || null})" class="text-xs text-rose-500 font-medium px-3 py-1.5 rounded-lg">🗑️ Wis</button
+                    ? `<button onclick="shareMatch(${idx}, true)" class="text-xs bg-slate-800 text-white font-medium px-3 py-1.5 rounded-lg">📲 WhatsApp</button><button onclick="shareMatch(${idx}, false)" class="text-xs bg-slate-100 text-slate-700 font-medium px-3 py-1.5 rounded-lg">📋 Kopieer</button><button onclick="editMatch(${idx})" class="text-xs bg-amber-50 text-amber-700 font-medium px-3 py-1.5 rounded-lg">✏️ Wijzig</button><button onclick="deleteMatch(${idx}, ${match.id || null})" class="text-xs text-rose-500 font-medium px-3 py-1.5 rounded-lg">🗑️ Wis</button>`
+                    : `<button onclick="shareMatch(${idx}, true)" class="text-xs bg-emerald-600 text-white font-medium px-4 py-2 rounded-lg">📲 WhatsApp</button><button onclick="shareMatch(${idx}, false)" class="text-xs bg-slate-100 text-slate-700 font-medium px-4 py-2 rounded-lg">📋 Info</button>`;
+
+                card.innerHTML = `
+                    <div class="flex-1">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="bg-slate-800 text-white font-bold text-xs px-2 py-0.5 rounded-md">⏱️ Verz: ${match.meet_time} u</span>
+                            <span class="bg-emerald-700 text-white font-bold text-xs px-2 py-0.5 rounded-md">🏑 Start: ${match.start_time} u</span>
+                            <span class="text-slate-500 text-sm font-medium capitalize">${fDate}</span>
+                            ${venueB} ${fieldB} ${mapsB}
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800 mt-1.5">vs ${match.opponent}</h3>
+                        ${match.address ? `<p class="text-xs text-slate-500 mt-0.5">🏠 Adres: ${match.address}</p>` : ''}
+                        ${absB} ${resB}
+                        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-3 pt-3 border-t border-slate-100">
+                            <div class="bg-blue-50/40 p-2 rounded-xl border"><span class="block text-[10px] font-bold text-blue-500">Keeper 🛡️</span><span class="text-xs font-semibold text-slate-700">${match.keeper || '—'}</span></div>
+                            <div class="bg-cyan-50/40 p-2 rounded-xl border"><span class="block text-[10px] font-bold text-cyan-600">Keeper Coach 🧑‍🏫</span><span class="text-xs font-semibold text-slate-700">${match.keeper_coach || '—'}</span></div>
+                            <div class="bg-amber-50/40 p-2 rounded-xl border"><span class="block text-[10px] font-bold text-amber-600">Fruit 🍊</span><span class="text-xs font-semibold text-slate-700">${match.snack || '—'}</span></div>
+                            <div class="bg-purple-50/40 p-2 rounded-xl border"><span class="block text-[10px] font-bold text-purple-500">Scheids 🏁</span><span class="text-xs font-semibold text-slate-700">${match.referee || '—'}</span></div>
+                            <div class="bg-rose-50/40 p-2 rounded-xl border"><span class="block text-[10px] font-bold text-rose-500">Veldcoach 🚐</span><span class="text-xs font-semibold text-slate-700">${match.coach || '—'}</span></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap md:flex-col items-center justify-end gap-2 border-t md:border-t-0 pt-3 md:pt-0">${knoppen}</div>`;
+                
+                if (isPast) { archiveList.appendChild(card); arcCount++; }
+                else { scheduleList.appendChild(card); actCount++; }
+            });
+            emptyState.style.display = actCount === 0 ? 'block' : 'none';
+            matchCount.textContent = `${actCount} Wedstrijden`; archiveCount.textContent = arcCount;
+        }
+
+        // Wijzigen & Verwijderen
+        window.editMatch = function(idx) {
+            const m = matches[idx]; editDbId = m.id || idx;
+            document.getElementById('opponent').value = m.opponent;
+            document.getElementById('fieldNumber').value = m.field_number || '';
+            document.getElementById('matchDate').value = m.match_date;
+            document.getElementById('meetTime').value = m.meet_time;
+            document.getElementById('startTime').value = m.start_time;
+            document.querySelector(`input[name="venue"][value="${m.venue}"]`).checked = true;
+            toggleAddressField();
+            if (m.venue === 'Uit') document.getElementById('matchAddress').value = m.address || '';
+            document.getElementById('matchAbsences').value = m.absences || '';
+            document.getElementById('dutyKeeper').value = m.keeper || '';
+            document.getElementById('dutyKeeperCoach').value = m.keeper_coach || '';
+            document.getElementById('dutySnack').value = m.snack || '';
+            document.getElementById('dutyReferee').value = m.referee || '';
+            document.getElementById('dutyCoach').value = m.coach || '';
+            formTitle.textContent = "Wedstrijd Wijzigen"; submitBtn.textContent = "Wijziging Opslaan";
+            cancelEditBtn.classList.remove('hidden');
+        };
+
+        window.resetFormState = function() {
+            editDbId = null; matchForm.reset(); formTitle.textContent = "Nieuwe Wedstrijd";
+            submitBtn.textContent = "Toevoegen aan Schema"; cancelEditBtn.classList.add('hidden');
+            document.querySelector('input[name="venue"][value="Thuis"]').checked = true; toggleAddressField();
+        };
+
+        if (isAdmin) {
+            matchForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const ven = document.querySelector('input[name="venue"]:checked').value;
+                const data = {
+                    opponent: document.getElementById('opponent').value,
+                    field_number: document.getElementById('fieldNumber').value.trim(),
+                    address: ven === 'Uit' ? document.getElementById('matchAddress').value.trim() : '',
+                    match_date: document.getElementById('matchDate').value,
+                    meet_time: document.getElementById('meetTime').value,
+                    start_time: document.getElementById('startTime').value,
+                    venue: ven,
+                    absences: document.getElementById('matchAbsences').value.trim(),
+                    keeper: document.getElementById('dutyKeeper').value,
+                    keeper_coach: document.getElementById('dutyKeeperCoach').value,
+                    snack: document.getElementById('dutySnack').value,
+                    referee: document.getElementById('dutyReferee').value,
+                    coach: document.getElementById('dutyCoach').value
+                };
+
+                if (useCloud && supabase) {
+                    if (editDbId !== null && typeof editDbId === 'number') {
+                        await supabase.from('matches').update(data).eq('id', editDbId);
+                    } else {
+                        await supabase.from('matches').insert([data]);
+                    }
+                } else {
+                    if (editDbId !== null) matches[editDbId] = data;
+                    else matches.push(data);
+                    localStorage.setItem('hockeySchedule', JSON.stringify(matches));
+                }
+                resetFormState(); await loadData();
+            });
+
+            window.deleteMatch = async function(localIdx, dbId) {
+                if(confirm("Wedstrijd verwijderen?")) {
+                    if (useCloud && supabase && dbId) {
+                        await supabase.from('matches').delete().eq('id', dbId);
+                    } else {
+                        matches.splice(localIdx, 1);
+                        localStorage.setItem('hockeySchedule', JSON.stringify(matches));
+                    }
+                    await loadData();
+                }
+            };
+        }
+
+        // WhatsApp Deel Functie
+        window.shareMatch = function(idx, launchWhatsApp) {
+            const m = matches[idx]; if (!m) return;
+            const fDate = new Date(m.match_date).toLocaleDateString('nl-NL', { weekday: 'long', month: 'long', day: 'numeric' });
+            const vRegel = m.field_number ? `📍 *Veld:* Veld ${m.field_number}\n` : '';
+            const uRegel = m.result ? `🏆 *Uitslag:* ${m.result}\n` : '';
+            const aRegel = m.absences ? `🚫 *Afgemeld:* ${m.absences}\n` : '';
+            
+            let adRegel = '';
+            if (m.venue === 'Uit' && m.address) {
+                const cleanAddress = encodeURIComponent(m.address);
+                adRegel = `🏠 *Adres:* ${m.address}\n🗺 *Google Maps:* https://maps.google.com/?q=${cleanAddress}\n`;
+            }
+
+            const tekst = `🏑 *WEDSTRIJD INFORMATIE* 🏑\n---------------------------\n🆚 *Tegenstander:* vs ${m.opponent} (${m.venue})\n📅 *Datum:* ${fDate}\n⏱️ *Verzamelen:* ${m.meet_time} uur\n🏑 *Aanvang:* ${m.start_time} uur\n` + vRegel + adRegel + uRegel + aRegel + `\n📋 *TAAKVERDELING:*\n🛡️ *Keeper:* ${m.keeper || 'Nog invullen'}\n🧑‍🏫 *Keeper Coach:* ${m.keeper_coach || 'Nog invullen'}\n🍊 *Fruit/Snacks:* ${m.snack || 'Nog invullen'}\n🏁 *Scheidsrechter:* ${m.referee || 'Nog invullen'}\n🚐 *Veldcoach:* ${m.coach || 'Nog invullen'}\n---------------------------`;
+
+            if (launchWhatsApp) window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(tekst)}`, '_blank');
+            else navigator.clipboard.writeText(tekst).then(() => alert('✨ Gekopieerd!'));
+        };
+
+        // Veilige timeout: Als de cloud na 2 seconde niet reageert, spring dan direct offline open!
+        setTimeout(() => {
+            if (matches.length === 0 && roster.length === 1) {
+                console.warn("Cloud reageert traag of is verkeerd ingesteld, we laden offline modus...");
+                useCloud = false; loadLocalFallback(); renderRoster(); renderSchedule();
+            }
+        }, 2000);
+
+        // Start de app op
+        loadData();
+    </script>
+</body>
+</html>
