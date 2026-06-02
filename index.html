@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hockey Wedstrijdschema & Taken</title>
+    <title>Hockey Wedstrijdschema & Taken (Live Cloud)</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans p-4 md:p-8">
 
@@ -12,9 +13,9 @@
         <header class="mb-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-3xl font-extrabold text-emerald-700 tracking-tight">🏑 Hockey Taken Planner</h1>
-                <p id="appSubtitle" class="text-slate-500 mt-1">Laden...</p>
+                <p id="appSubtitle" class="text-slate-500 mt-1">Laden van cloud database...</p>
             </div>
-            <div id="modeBadge" class="text-xs font-bold px-3 py-1 rounded-full shadow-xs"></div>
+            <div id="modeBadge" class="text-xs font-bold px-3 py-1 rounded-full shadow-xs bg-slate-100 text-slate-500">Laden...</div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -43,7 +44,7 @@
                                     <input type="radio" name="venue" value="Thuis" checked onchange="toggleAddressField()" class="sr-only"> 🏡 Thuis
                                 </label>
                                 <label class="cursor-pointer text-center py-1.5 text-sm font-medium rounded-lg block has-[:checked]:bg-white has-[:checked]:text-amber-700 has-[:checked]:shadow-xs text-slate-600">
-                                    <input type="radio" name="venue" value="Uit" onchange="toggleAddressField()" class="sr-only"> 🚌 Uit
+                                    <input type="radio" name="venue" value="Uit" class="sr-only"> 🚌 Uit
                                 </label>
                             </div>
                         </div>
@@ -157,13 +158,21 @@
     </div>
 
     <script>
+        // --- ⚠️ VUL HIER JOUW SUPABASE GEGEVENS IN ⚠️ ---
+        const SUPABASE_URL = "https://beycpbzfyjmrikbtwjzo.supabase.co"; 
+        const SUPABASE_ANON_KEY = "sb_publishable_ePuwhXWJyvina35-BKCXsA_j9aUvYEA";
+        
+        // Initialiseer Supabase Client
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Check Modus (?admin=ja)
         const urlParams = new URLSearchParams(window.location.search);
         const isAdmin = urlParams.get('admin') === 'ja';
 
-        // App Status
-        let matches = JSON.parse(localStorage.getItem('hockeySchedule')) || [];
-        let roster = JSON.parse(localStorage.getItem('hockeyRoster')) || ['Nog niet toegewezen'];
-        let editIndex = null; 
+        // App Status (Live geladen vanuit Cloud)
+        let matches = [];
+        let roster = [];
+        let editDbId = null; // Database ID van de wedstrijd die bewerkt wordt
 
         // DOM Elementen
         const adminPanel = document.getElementById('adminPanel');
@@ -191,7 +200,7 @@
         if (isAdmin) {
             adminPanel.classList.remove('hidden');
             scheduleContainer.classList.replace('lg:col-span-3', 'lg:col-span-2');
-            appSubtitle.textContent = "Beheer de spelerslijst, uitslagen, afmeldingen en teamtaken.";
+            appSubtitle.textContent = "Beheer de spelerslijst, uitslagen, afmeldingen en teamtaken via de Cloud.";
             modeBadge.textContent = "🛠️ MANAGER MODUS";
             modeBadge.className = "text-xs font-bold px-3 py-1 rounded-full shadow-xs bg-purple-100 text-purple-800";
         } else {
@@ -210,6 +219,23 @@
             }
         };
 
+        // --- DATA INLADEN UIT CLOUD ---
+        async function loadDataFromCloud() {
+            // 1. Haal Roster op
+            const { data: rosterData, error: rErr } = await supabase.from('roster').select('name').order('id', { ascending: true });
+            if (rErr) console.error("Fout bij laden spelers:", rErr);
+            else roster = rosterData.map(r => r.name);
+
+            // 2. Haal Wedstrijden op
+            const { data: matchData, error: mErr } = await supabase.from('matches').select('*');
+            if (mErr) console.error("Fout bij laden wedstrijden:", mErr);
+            else matches = matchData || [];
+
+            // Render de UI opnieuw met verse data
+            renderRoster();
+            renderSchedule();
+        }
+
         // --- STATISTIEKEN & TEAM BEHEER ---
         function calculateStats() {
             const stats = {};
@@ -218,11 +244,9 @@
             });
 
             matches.forEach(match => {
-                // Tel taken
                 Object.values(match.duties).forEach(player => {
                     if (player && stats[player] !== undefined) stats[player].duties++;
                 });
-                // Tel afmeldingen
                 if (match.absences && Array.isArray(match.absences)) {
                     match.absences.forEach(player => {
                         if (stats[player] !== undefined) stats[player].absences++;
@@ -235,7 +259,6 @@
         function renderRoster() {
             const stats = calculateStats();
             
-            // Render select dropdowns voor taken
             dutySelects.forEach(select => {
                 const currentVal = select.value;
                 select.innerHTML = '';
@@ -248,7 +271,6 @@
                 select.value = currentVal;
             });
 
-            // Render de Afmeld-checkboxes in het formulier
             formAbsencesList.innerHTML = '';
             let validPlayersCount = 0;
             roster.forEach((player) => {
@@ -263,7 +285,6 @@
 
             if (!isAdmin) return; 
 
-            // Render spelerslijst in beheerpaneel met beide tellers
             rosterList.innerHTML = '';
             roster.forEach((player, index) => {
                 if (index === 0) return; 
@@ -274,9 +295,9 @@
                 item.innerHTML = `
                     <span class="text-slate-700">${player}</span>
                     <div class="flex items-center gap-1.5">
-                        <span class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2 py-0.5 rounded-full" title="Uitgevoerde taken">📊 ${playerStat.duties}</span>
-                        <span class="bg-rose-100 text-rose-800 text-[11px] font-bold px-2 py-0.5 rounded-full" title="Afmeldingen">🚫 ${playerStat.absences}x</span>
-                        <button type="button" onclick="deletePlayer(${index})" class="text-slate-300 hover:text-rose-500 font-bold text-base transition ml-1">×</button>
+                        <span class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2 py-0.5 rounded-full">📊 ${playerStat.duties}</span>
+                        <span class="bg-rose-100 text-rose-800 text-[11px] font-bold px-2 py-0.5 rounded-full">🚫 ${playerStat.absences}x</span>
+                        <button type="button" onclick="deletePlayerFromCloud('${player}')" class="text-slate-300 hover:text-rose-500 font-bold text-base transition ml-1">×</button>
                     </div>
                 `;
                 rosterList.appendChild(item);
@@ -284,32 +305,35 @@
         }
 
         if (isAdmin) {
-            rosterForm.addEventListener('submit', (e) => {
+            rosterForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const nameInput = document.getElementById('playerName');
                 const name = nameInput.value.trim();
                 
                 if (name && !roster.includes(name)) {
-                    roster.push(name);
-                    localStorage.setItem('hockeyRoster', JSON.stringify(roster));
-                    renderRoster();
+                    const { error } = await supabase.from('roster').insert([{ name: name }]);
+                    if (error) alert("Fout bij opslaan speler: " + error.message);
                     nameInput.value = '';
+                    await loadDataFromCloud();
                 }
             });
 
-            window.deletePlayer = function(index) {
-                if(confirm(`Weet je zeker dat je ${roster[index]} wilt verwijderen?`)) {
-                    roster.splice(index, 1);
-                    localStorage.setItem('hockeyRoster', JSON.stringify(roster));
-                    renderRoster();
+            window.deletePlayerFromCloud = async function(playerName) {
+                if(confirm(`Weet je zeker dat je ${playerName} wilt verwijderen?`)) {
+                    const { error } = await supabase.from('roster').delete().eq('name', playerName);
+                    if (error) alert("Fout bij verwijderen: " + error.message);
+                    await loadDataFromCloud();
                 }
             };
         }
 
         // --- WEDSTRIJD & ARCHIEF BEHEER ---
-        window.saveResult = function(index, scoreValue) {
-            matches[index].result = scoreValue.trim();
-            localStorage.setItem('hockeySchedule', JSON.stringify(matches));
+        window.saveResultToCloud = async function(dbId, scoreValue) {
+            const { error } = await supabase.from('matches').update({ result: scoreValue.trim() }).eq('id', dbId);
+            if (error) console.error("Uitslag opslaan mislukt:", error);
+            // Stille update in de lokale array om teller synchroon te houden
+            const m = matches.find(x => x.id === dbId);
+            if (m) m.result = scoreValue.trim();
         };
 
         function renderSchedule() {
@@ -319,13 +343,14 @@
             const today = new Date();
             today.setHours(0,0,0,0);
 
-            matches.sort((a, b) => new Date(`${a.date}T${a.startTime}`) - new Date(`${b.date}T${b.startTime}`));
+            // Sorteer lokaal op datum en aanvangstijd
+            matches.sort((a, b) => new Date(`${a.match_date}T${a.start_time}`) - new Date(`${b.match_date}T${b.start_time}`));
 
             let activeCount = 0;
             let archivedCount = 0;
 
-            matches.forEach((match, originalIndex) => {
-                const matchDateObj = new Date(match.date);
+            matches.forEach((match) => {
+                const matchDateObj = new Date(match.match_date);
                 matchDateObj.setHours(0,0,0,0);
                 
                 const isPast = matchDateObj < today;
@@ -333,7 +358,7 @@
                 const card = document.createElement('div');
                 card.className = `match-card p-5 rounded-2xl shadow-sm border transition hover:shadow-md flex flex-col md:flex-row gap-4 justify-between ${isPast ? 'bg-slate-50 border-slate-200/70' : 'bg-white border-slate-100'}`;
                 
-                const formattedDate = new Date(match.date).toLocaleDateString('nl-NL', { 
+                const formattedDate = new Date(match.match_date).toLocaleDateString('nl-NL', { 
                     weekday: 'short', month: 'short', day: 'numeric' 
                 });
 
@@ -341,15 +366,14 @@
                     ? `<span class="bg-emerald-50 text-emerald-700 border border-emerald-200/60 text-[11px] font-bold px-2 py-0.5 rounded-md">🏡 THUIS</span>`
                     : `<span class="bg-amber-50 text-amber-700 border border-amber-200/60 text-[11px] font-bold px-2 py-0.5 rounded-md">🚌 UIT</span>`;
 
-                const fieldBadge = match.fieldNumber ? `<span class="bg-slate-100 text-slate-600 text-[11px] font-bold px-2 py-0.5 rounded-md">📍 Veld ${match.fieldNumber}</span>` : '';
+                const fieldBadge = match.field_number ? `<span class="bg-slate-100 text-slate-600 text-[11px] font-bold px-2 py-0.5 rounded-md">📍 Veld ${match.field_number}</span>` : '';
                 
                 let mapsBadge = '';
                 if (match.venue === 'Uit' && match.address) {
-                    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(match.address)}`;
+                    const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent(match.address)}`;
                     mapsBadge = `<a href="${mapsUrl}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white border border-blue-700 text-[11px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-xs transition">🗺️ Route</a>`;
                 }
 
-                // Render afmeld-badge in overzicht
                 let absenceBadge = '';
                 if (match.absences && match.absences.length > 0) {
                     absenceBadge = `<div class="mt-2 text-xs bg-rose-50 text-rose-700 border border-rose-100/80 px-2.5 py-1 rounded-xl flex flex-wrap items-center gap-1.5">
@@ -357,7 +381,6 @@
                     </div>`;
                 }
 
-                // Render uitslag blok
                 let resultBlock = '';
                 if (isPast) {
                     const currentResult = match.result || '';
@@ -365,7 +388,7 @@
                         resultBlock = `
                             <div class="mt-3 pt-2 border-t border-dashed border-slate-200 flex items-center gap-2">
                                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">🏆 Uitslag invoeren:</label>
-                                <input type="text" value="${currentResult}" placeholder="bijv. 3 - 1" onchange="saveResult(${originalIndex}, this.value)" class="w-24 px-2 py-1 text-xs border border-slate-300 rounded-md bg-white text-center font-bold text-emerald-700 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                                <input type="text" value="${currentResult}" placeholder="bijv. 3 - 1" onchange="saveResultToCloud(${match.id}, this.value)" class="w-24 px-2 py-1 text-xs border border-slate-300 rounded-md bg-white text-center font-bold text-emerald-700 focus:outline-none focus:ring-1 focus:ring-emerald-500">
                             </div>`;
                     } else if (currentResult) {
                         resultBlock = `
@@ -375,27 +398,26 @@
                     }
                 }
 
-                // Acties configureren
                 let actieKnoppen = '';
                 if (isAdmin) {
                     actieKnoppen = `
-                        <button onclick="shareMatch(${originalIndex}, true)" class="w-full md:w-auto text-xs bg-slate-800 hover:bg-slate-900 text-white font-medium px-3 py-1.5 rounded-lg transition flex items-center justify-center gap-1">📲 WhatsApp</button>
-                        <button onclick="shareMatch(${originalIndex}, false)" class="w-full md:w-auto text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-3 py-1.5 rounded-lg transition flex items-center justify-center gap-1">📋 Kopieer</button>
-                        <button onclick="startEditMatch(${originalIndex})" class="w-full md:w-auto text-xs bg-amber-50 hover:bg-amber-100 text-amber-700 font-medium px-3 py-1.5 rounded-lg transition flex items-center justify-center gap-1">✏️ Wijzig</button>
-                        <button onclick="deleteMatch(${originalIndex})" class="w-full md:w-auto text-xs text-rose-500 hover:bg-rose-50 font-medium px-3 py-1.5 rounded-lg transition flex items-center justify-center gap-1">🗑️ Wis</button>
+                        <button onclick="shareMatchById(${match.id}, true)" class="w-full md:w-auto text-xs bg-slate-800 hover:bg-slate-900 text-white font-medium px-3 py-1.5 rounded-lg transition flex items-center justify-center gap-1">📲 WhatsApp</button>
+                        <button onclick="shareMatchById(${match.id}, false)" class="w-full md:w-auto text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-3 py-1.5 rounded-lg transition flex items-center justify-center gap-1">📋 Kopieer</button>
+                        <button onclick="startEditMatchFromDb(${match.id})" class="w-full md:w-auto text-xs bg-amber-50 hover:bg-amber-100 text-amber-700 font-medium px-3 py-1.5 rounded-lg transition flex items-center justify-center gap-1">✏️ Wijzig</button>
+                        <button onclick="deleteMatchFromCloud(${match.id})" class="w-full md:w-auto text-xs text-rose-500 hover:bg-rose-50 font-medium px-3 py-1.5 rounded-lg transition flex items-center justify-center gap-1">🗑️ Wis</button>
                     `;
                 } else {
                     actieKnoppen = `
-                        <button onclick="shareMatch(${originalIndex}, true)" class="w-full md:w-auto text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2 rounded-lg transition flex items-center justify-center gap-1">📲 WhatsApp</button>
-                        <button onclick="shareMatch(${originalIndex}, false)" class="w-full md:w-auto text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-4 py-2 rounded-lg transition flex items-center justify-center gap-1">📋 Kopieer Info</button>
+                        <button onclick="shareMatchById(${match.id}, true)" class="w-full md:w-auto text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2 rounded-lg transition flex items-center justify-center gap-1">📲 WhatsApp</button>
+                        <button onclick="shareMatchById(${match.id}, false)" class="w-full md:w-auto text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-4 py-2 rounded-lg transition flex items-center justify-center gap-1">📋 Kopieer Info</button>
                     `;
                 }
 
                 card.innerHTML = `
                     <div class="flex-1">
                         <div class="flex flex-wrap items-center gap-2">
-                            <span class="bg-slate-800 text-white font-bold text-xs px-2 py-0.5 rounded-md">⏱️ Verz: ${match.meetTime} u</span>
-                            <span class="bg-emerald-700 text-white font-bold text-xs px-2 py-0.5 rounded-md">🏑 Start: ${match.startTime} u</span>
+                            <span class="bg-slate-800 text-white font-bold text-xs px-2 py-0.5 rounded-md">⏱️ Verz: ${match.meet_time} u</span>
+                            <span class="bg-emerald-700 text-white font-bold text-xs px-2 py-0.5 rounded-md">🏑 Start: ${match.start_time} u</span>
                             <span class="text-slate-500 text-sm font-medium capitalize">${formattedDate}</span>
                             ${venueBadge}
                             ${fieldBadge}
@@ -451,15 +473,16 @@
         }
 
         // --- WIJZIG LOGICA (ALLEEN ADMIN) ---
-        window.startEditMatch = function(index) {
-            editIndex = index;
-            const match = matches[index];
+        window.startEditMatchFromDb = function(dbId) {
+            editDbId = dbId;
+            const match = matches.find(x => x.id === dbId);
+            if (!match) return;
 
             document.getElementById('opponent').value = match.opponent;
-            document.getElementById('fieldNumber').value = match.fieldNumber || '';
-            document.getElementById('matchDate').value = match.date;
-            document.getElementById('meetTime').value = match.meetTime;
-            document.getElementById('startTime').value = match.startTime;
+            document.getElementById('fieldNumber').value = match.field_number || '';
+            document.getElementById('matchDate').value = match.match_date;
+            document.getElementById('meetTime').value = match.meet_time;
+            document.getElementById('startTime').value = match.start_time;
             document.querySelector(`input[name="venue"][value="${match.venue}"]`).checked = true;
             
             toggleAddressField();
@@ -467,7 +490,7 @@
                 document.getElementById('matchAddress').value = match.address || '';
             }
             
-            // Vink de juiste afgemelde spelers aan
+            // Vink checkboxes aan
             const checkBoxes = document.querySelectorAll('input[name="absentPlayers"]');
             checkBoxes.forEach(cb => {
                 cb.checked = match.absences && match.absences.includes(cb.value);
@@ -488,7 +511,7 @@
         };
 
         window.resetFormState = function() {
-            editIndex = null;
+            editDbId = null;
             matchForm.reset();
             formTitle.textContent = "Nieuwe Wedstrijd";
             submitBtn.textContent = "Toevoegen aan Schema";
@@ -496,17 +519,14 @@
             cancelEditBtn.classList.add('hidden');
             document.querySelector('input[name="venue"][value="Thuis"]').checked = true;
             toggleAddressField();
-            
-            // Ontvink alle checkboxes
             document.querySelectorAll('input[name="absentPlayers"]').forEach(cb => cb.checked = false);
         };
 
         if (isAdmin) {
-            matchForm.addEventListener('submit', (e) => {
+            matchForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const venueValue = document.querySelector('input[name="venue"]:checked').value;
 
-                // Haal geselecteerde afmeldingen op
                 const absentPlayers = [];
                 document.querySelectorAll('input[name="absentPlayers"]:checked').forEach(cb => {
                     absentPlayers.push(cb.value);
@@ -514,14 +534,13 @@
 
                 const matchData = {
                     opponent: document.getElementById('opponent').value,
-                    fieldNumber: document.getElementById('fieldNumber').value.trim(),
+                    field_number: document.getElementById('fieldNumber').value.trim(),
                     address: venueValue === 'Uit' ? document.getElementById('matchAddress').value.trim() : '',
-                    date: document.getElementById('matchDate').value,
-                    meetTime: document.getElementById('meetTime').value,
-                    startTime: document.getElementById('startTime').value,
+                    match_date: document.getElementById('matchDate').value,
+                    meet_time: document.getElementById('meetTime').value,
+                    start_time: document.getElementById('startTime').value,
                     venue: venueValue,
                     absences: absentPlayers,
-                    result: editIndex !== null ? (matches[editIndex].result || '') : '', // Behoud uitslag bij bewerken
                     duties: {
                         keeper: document.getElementById('dutyKeeper').value,
                         keeperCoach: document.getElementById('dutyKeeperCoach').value,
@@ -531,53 +550,55 @@
                     }
                 };
 
-                if (editIndex !== null) {
-                    matches[editIndex] = matchData;
-                    editIndex = null;
+                if (editDbId !== null) {
+                    // Update in Cloud
+                    const { error } = await supabase.from('matches').update(matchData).eq('id', editDbId);
+                    if (error) alert("Fout bij updaten: " + error.message);
                 } else {
-                    matches.push(matchData);
+                    // Voeg toe aan Cloud
+                    const { error } = await supabase.from('matches').insert([matchData]);
+                    if (error) alert("Fout bij opslaan: " + error.message);
                 }
 
-                localStorage.setItem('hockeySchedule', JSON.stringify(matches));
-                renderSchedule();
-                renderRoster(); 
                 resetFormState();
+                await loadDataFromCloud();
             });
 
-            window.deleteMatch = function(index) {
-                if(confirm("Weet je zeker dat je deze wedstrijd wilt verwijderen?")) {
-                    if (editIndex === index) resetFormState();
-                    matches.splice(index, 1);
-                    localStorage.setItem('hockeySchedule', JSON.stringify(matches));
-                    renderSchedule();
-                    renderRoster(); 
+            window.deleteMatchFromCloud = async function(dbId) {
+                if(confirm("Weet je zeker dat je deze wedstrijd wilt verwijderen uit de cloud?")) {
+                    if (editDbId === dbId) resetFormState();
+                    const { error } = await supabase.from('matches').delete().eq('id', dbId);
+                    if (error) alert("Fout bij verwijderen: " + error.message);
+                    await loadDataFromCloud();
                 }
             };
         }
 
         // --- WHATSAPP / DEEL FUNCTIE ---
-        window.shareMatch = function(index, launchWhatsApp = false) {
-            const match = matches[index];
-            const formattedDate = new Date(match.date).toLocaleDateString('nl-NL', { 
+        window.shareMatchById = function(dbId, launchWhatsApp = false) {
+            const match = matches.find(x => x.id === dbId);
+            if (!match) return;
+
+            const formattedDate = new Date(match.match_date).toLocaleDateString('nl-NL', { 
                 weekday: 'long', month: 'long', day: 'numeric' 
             });
 
-            const veldRegel = match.fieldNumber ? `📍 *Veld:* Veld ${match.fieldNumber}\n` : '';
+            const veldRegel = match.field_number ? `📍 *Veld:* Veld ${match.field_number}\n` : '';
             const uitslagRegel = match.result ? `🏆 *Uitslag:* ${match.result}\n` : '';
             const afmeldRegel = (match.absences && match.absences.length > 0) ? `🚫 *Afgemeld:* ${match.absences.join(', ')}\n` : '';
             
             let adresRegel = '';
             if (match.venue === 'Uit' && match.address) {
-                const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(match.address)}`;
-                adresRegel = `🏠 *Adres:* ${match.address}\n🗺️ *Google Maps Route:* ${mapsUrl}\n`;
+                const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent(match.address)}`;
+                adresRegel = `🏠 *Adres:* ${match.address}\n🗺 *Google Maps:* ${mapsUrl}\n`;
             }
 
             const textTemplate = `🏑 *WEDSTRIJD INFORMATIE* 🏑\n` +
                 `---------------------------\n` +
                 `🆚 *Tegenstander:* vs ${match.opponent} (${match.venue})\n` +
                 `📅 *Datum:* ${formattedDate}\n` +
-                `⏱️ *Verzamelen:* ${match.meetTime} uur\n` +
-                `🏑 *Aanvang:* ${match.startTime} uur\n` +
+                `⏱️ *Verzamelen:* ${match.meet_time} uur\n` +
+                `🏑 *Aanvang:* ${match.start_time} uur\n` +
                 veldRegel + adresRegel + uitslagRegel + afmeldRegel +
                 `\n📋 *TAAKVERDELING:*\n` +
                 `🛡️ *Keeper:* ${match.duties.keeper || 'Nog invullen'}\n` +
@@ -597,9 +618,8 @@
             }
         };
 
-        // Eerste Start
-        renderRoster();
-        renderSchedule();
+        // Eerste Start: Laad alle data live in uit de Cloud
+        loadDataFromCloud();
     </script>
 </body>
 </html>
