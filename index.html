@@ -14,7 +14,7 @@
                 <h1 class="text-3xl font-extrabold text-emerald-700 tracking-tight">🏑 Hockey Taken Planner</h1>
                 <p class="text-slate-500 mt-1">Beheer spelerslijsten, taken, uitslagen en afmeldingen direct op je Chromebook.</p>
             </div>
-            <div id="modeBadge" class="text-xs font-bold px-3 py-1 rounded-full shadow-sm bg-slate-100 text-slate-500">Laden...</div>
+            <div id="modeBadge" class="text-xs font-bold px-3 py-1 rounded-full shadow-sm bg-slate-100 text-slate-500">Gereed</div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -25,10 +25,10 @@
                     <h2 class="text-lg font-bold mb-1 text-slate-700 flex items-center gap-2">🏃‍♂️ Team & Statistieken</h2>
                     <p class="text-xs text-slate-400 mb-3">📊 = Aantal taken | 🚫 = Aantal keer afgemeld.</p>
                     
-                    <form id="rosterForm" class="flex gap-2 mb-4 max-w-md">
-                        <input type="text" id="playerName" placeholder="Naam speler..." required class="flex-1 px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                        <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium px-3 py-1.5 rounded-lg transition">Toevoegen</button>
-                    </form>
+                    <div class="flex gap-2 mb-4 max-w-md">
+                        <input type="text" id="playerName" placeholder="Naam speler..." class="flex-1 px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <button type="button" onclick="addNewPlayerManual()" class="bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium px-4 py-1.5 rounded-lg transition">Toevoegen</button>
+                    </div>
                     
                     <div id="rosterList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 pt-2">
                         </div>
@@ -126,3 +126,22 @@
                         <div class="space-y-2 pt-2">
                             <button type="submit" id="submitBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg transition duration-200 shadow-sm">
                                 Toevoegen aan Schema
+                            </button>
+                            <button type="button" id="cancelEditBtn" onclick="resetFormState()" class="w-full hidden bg-slate-100 hover:bg-slate-200 text-slate-600 py-2 rounded-lg">
+                                Annuleren
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="scheduleContainer" class="lg:col-span-3 space-y-8">
+                
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-slate-700">Aankomende Wedstrijden & Taken</h2>
+                        <span id="matchCount" class="bg-emerald-100 text-emerald-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">0 Wedstrijden</span>
+                    </div>
+                    
+                    <div id="scheduleList" class="space-y-4">
+                        <div id="emptyState" class="text-center py-12 bg-white rounded-
