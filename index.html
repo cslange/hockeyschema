@@ -12,9 +12,9 @@
         <header class="mb-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-3xl font-extrabold text-emerald-700 tracking-tight">🏑 Hockey Taken Planner</h1>
-                <p id="appSubtitle" class="text-slate-500 mt-1">Laden...</p>
+                <p id="appSubtitle" class="text-slate-500 mt-1">Beheer spelerslijsten, taken, uitslagen en afmeldingen direct op je Chromebook.</p>
             </div>
-            <div id="modeBadge" class="text-xs font-bold px-3 py-1 rounded-full shadow-xs"></div>
+            <div id="modeBadge" class="text-xs font-bold px-3 py-1 rounded-full shadow-xs bg-slate-100 text-slate-500">Laden...</div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -55,4 +55,15 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold mb-1">Veld nr.</label>
-                                <input type="text" id="fieldNumber" placeholder="4A" class="w-full
+                                <input type="text" id="fieldNumber" placeholder="4A" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold mb-1 text-slate-700">🏠 Adres club / Locatie</label>
+                            <input type="text" id="matchAddress" placeholder="Victoria (of adres tegenstander)" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">Datum</label>
+                            <input type="date" id="matchDate" required class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-50
